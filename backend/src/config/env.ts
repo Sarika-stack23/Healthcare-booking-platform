@@ -16,7 +16,7 @@ export const env = {
   isDev: process.env.NODE_ENV !== 'production',
 
   mongodb: {
-    uri: requireEnv('MONGODB_URI'),
+    uri: process.env.MONGODB_URL || process.env.MONGODB_URI || (() => { throw new Error('Missing MONGODB_URI or MONGODB_URL') })(),
   },
 
   jwt: {
