@@ -7,14 +7,10 @@ import {
   IDoctorProfile,
 } from '../types';
 
-// ─── Document Interface ─────────────────────────────────────────────────────
-
 export interface IUserDocument extends Omit<IUser, '_id'>, Document {
   comparePassword(candidatePassword: string): Promise<boolean>;
   fullName: string;
 }
-
-// ─── Sub-schemas ────────────────────────────────────────────────────────────
 
 const PatientProfileSchema = new Schema<IPatientProfile>(
   {
@@ -45,8 +41,6 @@ const DoctorProfileSchema = new Schema<IDoctorProfile>(
   { _id: false }
 );
 
-// ─── Main Schema ─────────────────────────────────────────────────────────────
-
 const UserSchema = new Schema<IUserDocument>(
   {
     firstName: {
@@ -64,7 +58,7 @@ const UserSchema = new Schema<IUserDocument>(
     email: {
       type: String,
       required: [true, 'Email is required'],
-      
+      unique: true,
       lowercase: true,
       trim: true,
       match: [/^\S+@\S+\.\S+$/, 'Please provide a valid email'],
@@ -105,37 +99,30 @@ const UserSchema = new Schema<IUserDocument>(
     timestamps: true,
     toJSON: {
       virtuals: true,
-      transform: (_doc, ret) => {
-        delete ret.password;
-        delete ret.tokenVersion;
-        delete ret.passwordResetToken;
-        delete ret.passwordResetExpires;
-        delete ret.__v;
+      transform: (_doc: unknown, ret: Record<string, unknown>) => {
+        ret['password'] = undefined;
+        ret['tokenVersion'] = undefined;
+        ret['passwordResetToken'] = undefined;
+        ret['passwordResetExpires'] = undefined;
+        ret['__v'] = undefined;
         return ret;
       },
     },
   }
 );
 
-// ─── Indexes ─────────────────────────────────────────────────────────────────
 
-UserSchema.index({ email: 1 }, { unique: true });
 UserSchema.index({ role: 1 });
 UserSchema.index({ isActive: 1 });
 UserSchema.index({ 'doctorProfile.specialization': 1 });
 UserSchema.index({ createdAt: -1 });
 
-// ─── Virtuals ────────────────────────────────────────────────────────────────
-
 UserSchema.virtual('fullName').get(function (this: IUserDocument) {
   return `${this.firstName} ${this.lastName}`;
 });
 
-// ─── Pre-save Hook ────────────────────────────────────────────────────────────
-
 UserSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
-
   try {
     const salt = await bcrypt.genSalt(12);
     this.password = await bcrypt.hash(this.password, salt);
@@ -145,15 +132,11 @@ UserSchema.pre('save', async function (next) {
   }
 });
 
-// ─── Methods ─────────────────────────────────────────────────────────────────
-
 UserSchema.methods.comparePassword = async function (
   candidatePassword: string
 ): Promise<boolean> {
   return bcrypt.compare(candidatePassword, this.password);
 };
-
-// ─── Model ───────────────────────────────────────────────────────────────────
 
 const User: Model<IUserDocument> = mongoose.model<IUserDocument>('User', UserSchema);
 

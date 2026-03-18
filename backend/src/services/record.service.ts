@@ -1,3 +1,4 @@
+import { Types } from 'mongoose';
 import path from 'path';
 import { Request } from 'express';
 import MedicalRecord, { IMedicalRecordDocument } from '../models/MedicalRecord';
@@ -16,7 +17,6 @@ export const uploadRecord = async (
   input: UploadRecordInput,
   ipAddress?: string
 ): Promise<IMedicalRecordDocument> => {
-  // Determine patient — doctors can upload on behalf of a patient
   let patientId: string;
 
   if (role === 'patient') {
@@ -77,11 +77,9 @@ export const listRecords = async (
 
   const filter: Record<string, unknown> = {};
 
-  // Scope by role
   if (role === 'patient') {
     filter.patientId = userId;
   } else if (role === 'doctor') {
-    // Doctors can view records of their patients (simplified: all non-deleted)
     if (patientId) filter.patientId = patientId;
   } else if (role === 'admin') {
     if (patientId) filter.patientId = patientId;
@@ -148,7 +146,6 @@ export const getRecordById = async (
 
   if (!record) throw ApiError.notFound('Medical record not found');
 
-  // Access control
   const isPatient = record.patientId._id.toString() === userId;
   const isUploader = record.uploadedBy._id.toString() === userId;
 
@@ -179,7 +176,6 @@ export const generateDownloadUrl = async (
   const record = await MedicalRecord.findById(recordId);
   if (!record) throw ApiError.notFound('Medical record not found');
 
-  // Access control
   const isPatient = record.patientId.toString() === userId;
   const isUploader = record.uploadedBy.toString() === userId;
 
@@ -187,10 +183,8 @@ export const generateDownloadUrl = async (
     throw ApiError.forbidden('You do not have permission to download this file');
   }
 
-  const expiresIn = 3600; // 1 hour
+  const expiresIn = 3600;
 
-  // In production with S3, you would generate a presigned URL here
-  // For local storage, we generate a time-limited URL
   const url = generateLocalSignedUrl(req, record.file.storageKey, expiresIn);
 
   await createAuditLog({
@@ -221,7 +215,6 @@ export const deleteRecord = async (
   const record = await MedicalRecord.findById(recordId);
   if (!record) throw ApiError.notFound('Medical record not found');
 
-  // Access control — only uploader or admin can delete
   const isUploader = record.uploadedBy.toString() === userId;
 
   if (role !== 'admin' && !isUploader) {
@@ -229,14 +222,12 @@ export const deleteRecord = async (
   }
 
   if (hardDelete && role === 'admin') {
-    // Hard delete — remove file and document
     deleteLocalFile(record.file.storageKey);
     await MedicalRecord.findByIdAndDelete(recordId);
   } else {
-    // Soft delete
     record.isDeleted = true;
     record.deletedAt = new Date();
-    record.deletedBy = userId as unknown as import('mongoose').Types.ObjectId;
+    record.deletedBy = new Types.ObjectId(userId);
     await record.save();
   }
 
@@ -259,13 +250,11 @@ export const getLocalFilePath = async (
   filename: string,
   expiresParam: string
 ): Promise<string> => {
-  // Validate expiry
   const expires = parseInt(expiresParam, 10);
   if (isNaN(expires) || Date.now() > expires) {
     throw ApiError.unauthorized('Download link has expired');
   }
 
-  // Sanitize filename — prevent path traversal
   const sanitized = path.basename(filename);
   const filePath = path.join(process.cwd(), 'uploads', sanitized);
 

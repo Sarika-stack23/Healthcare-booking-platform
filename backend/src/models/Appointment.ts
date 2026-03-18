@@ -7,7 +7,7 @@ export interface IAppointmentDocument extends Document {
   patientId: Types.ObjectId;
   doctorId: Types.ObjectId;
   scheduledDate: Date;
-  scheduledTime: string;         // HH:mm
+  scheduledTime: string;
   durationMinutes: number;
   status: IAppointmentStatus;
   reasonForVisit: string;
@@ -28,8 +28,6 @@ export interface IAppointmentDocument extends Document {
   updatedAt: Date;
 }
 
-// ─── Sub-schemas ──────────────────────────────────────────────────────────────
-
 const AppointmentNoteSchema = new Schema<IAppointmentNote>(
   {
     content: { type: String, required: true, trim: true },
@@ -48,8 +46,6 @@ const AppointmentAuditSchema = new Schema(
   },
   { _id: false }
 );
-
-// ─── Main Schema ──────────────────────────────────────────────────────────────
 
 const AppointmentSchema = new Schema<IAppointmentDocument>(
   {
@@ -106,29 +102,23 @@ const AppointmentSchema = new Schema<IAppointmentDocument>(
     timestamps: true,
     toJSON: {
       virtuals: true,
-      transform: (_doc, ret) => {
-        delete ret.__v;
+      transform: (_doc: unknown, ret: Record<string, unknown>) => {
+        ret['__v'] = undefined;
         return ret;
       },
     },
   }
 );
 
-// ─── Indexes ──────────────────────────────────────────────────────────────────
-
 AppointmentSchema.index({ patientId: 1, scheduledDate: -1 });
 AppointmentSchema.index({ doctorId: 1, scheduledDate: -1 });
 AppointmentSchema.index({ doctorId: 1, scheduledDate: 1, scheduledTime: 1 });
 AppointmentSchema.index({ status: 1 });
 AppointmentSchema.index({ createdAt: -1 });
-
-// Compound index for conflict detection
 AppointmentSchema.index(
   { doctorId: 1, scheduledDate: 1, scheduledTime: 1, status: 1 },
   { name: 'conflict_detection_idx' }
 );
-
-// ─── Model ────────────────────────────────────────────────────────────────────
 
 const Appointment: Model<IAppointmentDocument> = mongoose.model<IAppointmentDocument>(
   'Appointment',

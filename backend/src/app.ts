@@ -21,6 +21,12 @@ import userRoutes from './routes/user.routes';
 import doctorRoutes from './routes/doctor.routes';
 import appointmentRoutes from './routes/appointment.routes';
 import recordRoutes from './routes/record.routes';
+import notificationRoutes from './routes/notification.routes';
+import adminRoutes from './routes/admin.routes';
+import swaggerUi from 'swagger-ui-express';
+import { swaggerSpec } from './config/swagger';
+
+
 
 // ─── App Init ─────────────────────────────────────────────────────────────────
 
@@ -143,6 +149,10 @@ app.use(`${API_PREFIX}/users`, userRoutes);
 app.use(`${API_PREFIX}/doctors`, doctorRoutes);
 app.use(`${API_PREFIX}/appointments`, appointmentRoutes);
 app.use(`${API_PREFIX}/records`, recordRoutes);
+app.use(`${API_PREFIX}/notifications`, notificationRoutes);
+app.use(`${API_PREFIX}/admin`, adminRoutes);
+app.use(`${API_PREFIX}/docs`, swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.get(`${API_PREFIX}/docs.json`, (_req, res) => res.send(swaggerSpec));
 
 // ─── API Info ─────────────────────────────────────────────────────────────────
 
@@ -158,6 +168,8 @@ app.get(`${API_PREFIX}`, (_req: Request, res: Response) => {
       doctors: `${API_PREFIX}/doctors`,
       appointments: `${API_PREFIX}/appointments`,
       records: `${API_PREFIX}/records`,
+      notifications: `${API_PREFIX}/notifications`,
+      admin: `${API_PREFIX}/admin`,
     },
   });
 });

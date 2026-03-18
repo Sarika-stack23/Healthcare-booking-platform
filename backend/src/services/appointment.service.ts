@@ -1,3 +1,4 @@
+import { Types } from 'mongoose';
 import Appointment, { IAppointmentDocument } from '../models/Appointment';
 import User from '../models/User';
 import { ApiError } from '../utils/ApiError';
@@ -18,7 +19,6 @@ export const bookAppointment = async (
   input: BookAppointmentInput,
   ipAddress?: string
 ): Promise<IAppointmentDocument> => {
-  // Verify doctor exists
   const doctor = await User.findOne({
     _id: input.doctorId,
     role: 'doctor',
@@ -28,16 +28,13 @@ export const bookAppointment = async (
   if (!doctor) throw ApiError.notFound('Doctor not found');
   if (!doctor.doctorProfile) throw ApiError.internal('Doctor profile not configured');
 
-  // Prevent patients from booking with themselves (edge case)
   if (patientId === input.doctorId) {
     throw ApiError.badRequest('You cannot book an appointment with yourself');
   }
 
-  // ── Conflict Detection ──────────────────────────────────────────────────────
   const scheduledDate = new Date(input.scheduledDate);
   scheduledDate.setHours(0, 0, 0, 0);
 
-  // Check if doctor has this slot available
   const { slots: availableSlots } = await getAvailableSlots(
     input.doctorId,
     input.scheduledDate
@@ -49,7 +46,6 @@ export const bookAppointment = async (
     );
   }
 
-  // Double-check for existing appointment at same slot (race condition guard)
   const existing = await Appointment.findOne({
     doctorId: input.doctorId,
     scheduledDate: {
@@ -66,7 +62,6 @@ export const bookAppointment = async (
     );
   }
 
-  // ── Create Appointment ──────────────────────────────────────────────────────
   const appointment = await Appointment.create({
     patientId,
     doctorId: input.doctorId,
@@ -79,7 +74,7 @@ export const bookAppointment = async (
     auditLog: [
       {
         action: 'BOOKED',
-        performedBy: patientId,
+        performedBy: new Types.ObjectId(patientId),
         performedAt: new Date(),
         details: `Appointment booked by patient`,
       },
@@ -113,16 +108,13 @@ export const listAppointments = async (
 
   const filter: Record<string, unknown> = {};
 
-  // Scope appointments to the requesting user
   if (role === 'patient') {
     filter.patientId = userId;
   } else if (role === 'doctor') {
     filter.doctorId = userId;
   }
-  // Admin sees all
 
   if (status) filter.status = status;
-
   if (doctorId && role !== 'doctor') filter.doctorId = doctorId;
 
   if (startDate || endDate) {
@@ -178,7 +170,6 @@ export const getAppointmentById = async (
 
   if (!appointment) throw ApiError.notFound('Appointment not found');
 
-  // Access control
   const isPatient = appointment.patientId._id.toString() === userId;
   const isDoctor = appointment.doctorId._id.toString() === userId;
 
@@ -209,7 +200,6 @@ export const rescheduleAppointment = async (
   const appointment = await Appointment.findById(appointmentId);
   if (!appointment) throw ApiError.notFound('Appointment not found');
 
-  // Access control — patient or doctor can reschedule
   const isPatient = appointment.patientId.toString() === userId;
   const isDoctor = appointment.doctorId.toString() === userId;
 
@@ -223,7 +213,6 @@ export const rescheduleAppointment = async (
     );
   }
 
-  // Validate new slot availability
   const { slots: availableSlots } = await getAvailableSlots(
     appointment.doctorId.toString(),
     input.scheduledDate
@@ -235,7 +224,6 @@ export const rescheduleAppointment = async (
     );
   }
 
-  // Double-check conflict (exclude current appointment)
   const newDate = new Date(input.scheduledDate);
   newDate.setHours(0, 0, 0, 0);
 
@@ -261,7 +249,7 @@ export const rescheduleAppointment = async (
   appointment.scheduledTime = input.scheduledTime;
   appointment.auditLog.push({
     action: 'RESCHEDULED',
-    performedBy: userId as unknown as import('mongoose').Types.ObjectId,
+    performedBy: new Types.ObjectId(userId),
     performedAt: new Date(),
     details: `From ${oldDate.toISOString().split('T')[0]} ${oldTime} to ${input.scheduledDate} ${input.scheduledTime}`,
   });
@@ -307,11 +295,11 @@ export const cancelAppointment = async (
 
   appointment.status = 'cancelled';
   appointment.cancellationReason = input.reason;
-  appointment.cancelledBy = userId as unknown as import('mongoose').Types.ObjectId;
+  appointment.cancelledBy = new Types.ObjectId(userId);
   appointment.cancelledAt = new Date();
   appointment.auditLog.push({
     action: 'CANCELLED',
-    performedBy: userId as unknown as import('mongoose').Types.ObjectId,
+    performedBy: new Types.ObjectId(userId),
     performedAt: new Date(),
     details: input.reason,
   });
@@ -354,7 +342,7 @@ export const completeAppointment = async (
   appointment.completedAt = new Date();
   appointment.auditLog.push({
     action: 'COMPLETED',
-    performedBy: doctorId as unknown as import('mongoose').Types.ObjectId,
+    performedBy: new Types.ObjectId(doctorId),
     performedAt: new Date(),
   });
 

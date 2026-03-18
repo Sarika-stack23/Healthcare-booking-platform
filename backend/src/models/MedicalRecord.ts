@@ -1,8 +1,6 @@
 import mongoose, { Document, Schema, Model, Types } from 'mongoose';
 import { IRecordType, IFileMetadata } from '../types';
 
-// ─── Document Interface ──────────────────────────────────────────────────────
-
 export interface IMedicalRecordDocument extends Document {
   patientId: Types.ObjectId;
   uploadedBy: Types.ObjectId;
@@ -19,8 +17,6 @@ export interface IMedicalRecordDocument extends Document {
   updatedAt: Date;
 }
 
-// ─── File Metadata Sub-schema ─────────────────────────────────────────────────
-
 const FileMetadataSchema = new Schema<IFileMetadata>(
   {
     originalName: { type: String, required: true },
@@ -36,8 +32,6 @@ const FileMetadataSchema = new Schema<IFileMetadata>(
   },
   { _id: false }
 );
-
-// ─── Main Schema ──────────────────────────────────────────────────────────────
 
 const MedicalRecordSchema = new Schema<IMedicalRecordDocument>(
   {
@@ -92,19 +86,17 @@ const MedicalRecordSchema = new Schema<IMedicalRecordDocument>(
     timestamps: true,
     toJSON: {
       virtuals: true,
-      transform: (_doc, ret) => {
-        // Never expose raw storage key to client
-        if (ret.file) {
-          delete ret.file.storageKey;
+      transform: (_doc: unknown, ret: Record<string, unknown>) => {
+        // Hide storageKey from client — never expose raw file path
+        if (ret['file'] && typeof ret['file'] === 'object') {
+          (ret['file'] as Record<string, unknown>)['storageKey'] = undefined;
         }
-        delete ret.__v;
+        ret['__v'] = undefined;
         return ret;
       },
     },
   }
 );
-
-// ─── Indexes ──────────────────────────────────────────────────────────────────
 
 MedicalRecordSchema.index({ patientId: 1, createdAt: -1 });
 MedicalRecordSchema.index({ patientId: 1, recordType: 1 });
@@ -112,17 +104,12 @@ MedicalRecordSchema.index({ appointmentId: 1 });
 MedicalRecordSchema.index({ isDeleted: 1 });
 MedicalRecordSchema.index({ tags: 1 });
 
-// ─── Query Middleware — Auto filter soft-deleted ──────────────────────────────
-
 MedicalRecordSchema.pre(/^find/, function (this: mongoose.Query<unknown, IMedicalRecordDocument>, next) {
-  // Only filter if isDeleted is not explicitly set in the query
   if (this.getFilter().isDeleted === undefined) {
     this.where({ isDeleted: false });
   }
   next();
 });
-
-// ─── Model ────────────────────────────────────────────────────────────────────
 
 const MedicalRecord: Model<IMedicalRecordDocument> = mongoose.model<IMedicalRecordDocument>(
   'MedicalRecord',
