@@ -55,10 +55,10 @@ This project was built as a full-stack portfolio piece demonstrating production-
 
 | Resource | URL |
 |---|---|
-| 🌐 Live API Base | [`https://faithful-acceptance-production-410b.up.railway.app/api`](https://faithful-acceptance-production-410b.up.railway.app/api) |
-| ❤️ Health Check | [`https://faithful-acceptance-production-410b.up.railway.app/health`](https://faithful-acceptance-production-410b.up.railway.app/health) |
-| 📖 Swagger UI Docs | [`https://faithful-acceptance-production-410b.up.railway.app/api/docs`](https://faithful-acceptance-production-410b.up.railway.app/api/docs) |
-| 🟢 Readiness Check | [`https://faithful-acceptance-production-410b.up.railway.app/ready`](https://faithful-acceptance-production-410b.up.railway.app/ready) |
+| 🌐 Live API Base | [`https://heathcare-booking-platform.up.railway.app/api`](https://faithful-acceptance-production-410b.up.railway.app/api) |
+| ❤️ Health Check | [`https://heathcare-booking-platform.up.railway.app/health`](https://faithful-acceptance-production-410b.up.railway.app/health) |
+| 📖 Swagger UI Docs | [`https://heathcare-booking-platform.up.railway.app/api/docs`](https://faithful-acceptance-production-410b.up.railway.app/api/docs) |
+| 🟢 Readiness Check | [`https://heathcare-booking-platform.up.railway.app/ready`](https://faithful-acceptance-production-410b.up.railway.app/ready) |
 
 > **Note:** The API is live and connected to a MongoDB instance on Railway. You can test all endpoints via Swagger UI or Postman using the base URL above.
 
@@ -237,7 +237,7 @@ Request
 
 ### Base URL
 ```
-https://faithful-acceptance-production-410b.up.railway.app/api
+https://heathcare-booking-platform.up.railway.app/api
 ```
 
 ### Authentication
@@ -457,7 +457,7 @@ A complete Postman collection (`Medailockr.postman_collection.json`) is included
 1. Import the collection into Postman
 2. Set the `baseUrl` variable to:
    - **Local:** `http://localhost:5001/api`
-   - **Production:** `https://faithful-acceptance-production-410b.up.railway.app/api`
+   - **Production:** `https://heathcare-booking-platform.up.railway.app/api`
 3. Run `Register Patient` → tokens auto-save to collection variables
 4. All subsequent requests use `{{accessToken}}` automatically
 

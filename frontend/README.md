@@ -55,9 +55,9 @@ This frontend connects to the MedAILockr backend API:
 
 | Resource | URL |
 |---|---|
-| 🌐 Live API | `https://faithful-acceptance-production-410b.up.railway.app/api` |
-| ❤️ Health Check | `https://faithful-acceptance-production-410b.up.railway.app/health` |
-| 📖 API Docs (Swagger) | `https://faithful-acceptance-production-410b.up.railway.app/api/docs` |
+| 🌐 Live API | `https://heathcare-booking-platform.up.railway.app/api` |
+| ❤️ Health Check | `https://heathcare-booking-platform.up.railway.app/health` |
+| 📖 API Docs (Swagger) | `https://heathcare-booking-platform.up.railway.app/api/docs` |
 
 > See the [backend README](../backend/README.md) for full API documentation.
 
@@ -119,7 +119,7 @@ VITE_API_BASE_URL=http://localhost:5001/api
 Or to use the live production backend:
 
 ```env
-VITE_API_BASE_URL=https://faithful-acceptance-production-410b.up.railway.app/api
+VITE_API_BASE_URL=https://heathcare-booking-platform.up.railway.app/api
 ```
 
 ### 4. Start Development Server
@@ -215,7 +215,7 @@ reactDom.configs.recommended,
 ## 🔗 Related
 
 - [Backend README](../backend/README.md) — API setup, endpoints, deployment
-- [Live API Docs](https://faithful-acceptance-production-410b.up.railway.app/api/docs) — Swagger UI
+- [Live API Docs](https://heathcare-booking-platform.up.railway.app/api/docs) — Swagger UI
 
 ---
 

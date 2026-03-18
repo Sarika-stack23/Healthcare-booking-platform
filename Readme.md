@@ -63,10 +63,10 @@ Built to demonstrate real-world full-stack development practices including:
 
 | Resource | URL |
 |---|---|
-| 🌐 **Live API** | [`https://faithful-acceptance-production-410b.up.railway.app/api`](https://faithful-acceptance-production-410b.up.railway.app/api) |
-| ❤️ **Health Check** | [`https://faithful-acceptance-production-410b.up.railway.app/health`](https://faithful-acceptance-production-410b.up.railway.app/health) |
-| 📖 **Swagger UI Docs** | [`https://faithful-acceptance-production-410b.up.railway.app/api/docs`](https://faithful-acceptance-production-410b.up.railway.app/api/docs) |
-| 🟢 **Readiness Check** | [`https://faithful-acceptance-production-410b.up.railway.app/ready`](https://faithful-acceptance-production-410b.up.railway.app/ready) |
+| 🌐 **Live API** | [`https://heathcare-booking-platform.up.railway.app/api`](https://heathcare-booking-platform.up.railway.app/api) |
+| ❤️ **Health Check** | [`https://heathcare-booking-platform.up.railway.app/health`](https://heathcare-booking-platform.up.railway.app/health) |
+| 📖 **Swagger UI Docs** | [`https://heathcare-booking-platform.up.railway.app/docs`](https://heathcare-booking-platform.up.railway.app/api/docs) |
+| 🟢 **Readiness Check** | [`https://heathcare-booking-platform.up.railway.app/ready`](https://heathcare-booking-platform.up.railway.app/ready) |
 
 > The backend is live and deployed on Railway (us-west2) with Node.js v22 and a connected MongoDB instance.
 
@@ -253,7 +253,7 @@ npm run dev
 
 > To use the **live production backend** instead of running locally, set:
 > ```
-> VITE_API_BASE_URL=https://faithful-acceptance-production-410b.up.railway.app/api
+> VITE_API_BASE_URL=https://heathcare-booking-platform.up.railway.app/api
 > ```
 
 ---
@@ -262,7 +262,7 @@ npm run dev
 
 Full interactive API docs are available via Swagger UI:
 
-🔗 [`https://faithful-acceptance-production-410b.up.railway.app/api/docs`](https://faithful-acceptance-production-410b.up.railway.app/api/docs)
+🔗 [`https://heathcare-booking-platform.up.railway.app/api/docs`](https://heathcare-booking-platform.up.railway.app/api/docs)
 
 ### Quick Endpoint Reference
 
@@ -353,7 +353,7 @@ This project is licensed under the **MIT License**.
 |---|---|
 | [`backend/README.md`](./backend/README.md) | Backend API — full setup, endpoints, security, DB schema |
 | [`frontend/README.md`](./frontend/README.md) | Frontend — setup, structure, scripts |
-| [Live Swagger Docs](https://faithful-acceptance-production-410b.up.railway.app/api/docs) | Interactive API explorer |
+| [Live Swagger Docs](https://heathcare-booking-platform.up.railway.app/api/docs) | Interactive API explorer |
 
 ---
 
@@ -362,7 +362,7 @@ This project is licensed under the **MIT License**.
   <br/>
   <sub>MedAILockr — Full Stack Healthcare Booking Platform</sub>
   <br/><br/>
-  <a href="https://faithful-acceptance-production-410b.up.railway.app/health">🟢 API Status</a> •
-  <a href="https://faithful-acceptance-production-410b.up.railway.app/api/docs">📖 API Docs</a> •
+  <a href="https://heathcare-booking-platform.up.railway.app/health">🟢 API Status</a> •
+  <a href="https://heathcare-booking-platform.up.railway.app/api/docs">📖 API Docs</a> •
   <a href="https://github.com/Sarika-stack23/Healthcare-booking-platform">⭐ Star on GitHub</a>
 </div>
