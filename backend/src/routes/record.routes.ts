@@ -11,16 +11,17 @@ import {
 
 const router = Router();
 
-// All record routes require authentication
-router.use(authenticate);
-
-// ─── File Serving (no auth — URL has expiry token) ───────────────────────────
-
-// GET /api/records/file/:filename  (served directly with expiry check)
+// FIX: File serving route moved BEFORE router.use(authenticate) so it does not
+// require a Bearer token. Access is controlled by the URL expiry timestamp instead.
+// Previously the route was defined after authenticate middleware was applied to all
+// routes, meaning the comment "no auth" was misleading — auth was still running.
 router.get(
   '/file/:filename',
   RecordController.serveFile
 );
+
+// All remaining record routes require authentication
+router.use(authenticate);
 
 // ─── Records CRUD ─────────────────────────────────────────────────────────────
 

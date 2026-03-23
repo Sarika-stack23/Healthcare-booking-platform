@@ -6,7 +6,6 @@ import { SendNotificationInput, ListNotificationsQuery } from '../validators/not
 import { IPaginatedResponse } from '../types';
 
 // ─── Template Registry ────────────────────────────────────────────────────────
-// In production this would load HTML templates from a template engine (Handlebars, etc.)
 
 const TEMPLATES: Record<string, { subject: string; body: (data: Record<string, unknown>) => string }> = {
   appointment_booked: {
@@ -37,8 +36,6 @@ const TEMPLATES: Record<string, { subject: string; body: (data: Record<string, u
 };
 
 // ─── Dispatch Simulation ──────────────────────────────────────────────────────
-// In production: replace each branch with real provider SDKs
-// (Nodemailer/SendGrid for email, Twilio for SMS, FCM for push)
 
 const dispatch = async (
   type: string,
@@ -49,8 +46,11 @@ const dispatch = async (
   // Simulate async I/O (network call to provider)
   await new Promise((r) => setTimeout(r, 50));
 
-  // Simulate occasional transient failures (10% rate — for retry demo)
-  if (Math.random() < 0.1) {
+  // FIX: Transient failure simulation is now ONLY active outside production.
+  // Previously this ran in all environments, randomly failing ~10% of real
+  // notifications in production/staging. In production, replace this entire
+  // block with actual provider SDK calls (SendGrid, Twilio, FCM, etc.)
+  if (process.env.NODE_ENV !== 'production' && Math.random() < 0.1) {
     throw new Error('Provider transient error: connection timeout');
   }
 
@@ -62,7 +62,6 @@ const dispatch = async (
 };
 
 // ─── Process Queue (retry worker) ─────────────────────────────────────────────
-// In production this runs on a Bull/Agenda job every N minutes
 
 export const processNotificationQueue = async (): Promise<void> => {
   const pending = await Notification.find({
@@ -104,18 +103,15 @@ export const processNotificationQueue = async (): Promise<void> => {
 export const sendNotification = async (
   input: SendNotificationInput
 ): Promise<INotificationDocument> => {
-  // Verify user exists
   const user = await User.findById(input.userId);
   if (!user) throw ApiError.notFound('User not found');
 
-  // Resolve template body if a known template is supplied
   let resolvedBody = input.body;
   let resolvedSubject = input.subject;
 
   if (TEMPLATES[input.template]) {
     const tpl = TEMPLATES[input.template];
     if (!resolvedSubject) resolvedSubject = tpl.subject;
-    // Use the provided body as template data context when it looks like JSON
     try {
       const ctx = JSON.parse(input.body) as Record<string, unknown>;
       resolvedBody = tpl.body(ctx);
@@ -138,7 +134,6 @@ export const sendNotification = async (
     scheduledAt: input.scheduledAt ? new Date(input.scheduledAt) : undefined,
   });
 
-  // Fire-and-forget: attempt immediate dispatch if not scheduled
   if (!input.scheduledAt) {
     notification.lastAttemptAt = new Date();
     notification.retryCount += 1;
@@ -225,7 +220,6 @@ export const retryNotification = async (
   notification.failureReason = undefined;
   await notification.save();
 
-  // Trigger immediate re-attempt
   await processNotificationQueue();
 
   return Notification.findById(notificationId) as Promise<INotificationDocument>;

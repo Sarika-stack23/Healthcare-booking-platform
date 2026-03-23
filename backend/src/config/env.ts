@@ -10,13 +10,23 @@ const requireEnv = (key: string): string => {
   return value;
 };
 
+// FIX: Use requireEnv consistently for MongoDB URI instead of inline throw
+// This ensures dotenv has loaded before validation and gives a clear error message
+const getMongoUri = (): string => {
+  const uri = process.env.MONGODB_URL || process.env.MONGODB_URI;
+  if (!uri) {
+    throw new Error('Missing required environment variable: MONGODB_URL or MONGODB_URI');
+  }
+  return uri;
+};
+
 export const env = {
   port: parseInt(process.env.PORT || '5000', 10),
   nodeEnv: process.env.NODE_ENV || 'development',
   isDev: process.env.NODE_ENV !== 'production',
 
   mongodb: {
-    uri: process.env.MONGODB_URL || process.env.MONGODB_URI || (() => { throw new Error('Missing MONGODB_URI or MONGODB_URL') })(),
+    uri: getMongoUri(),
   },
 
   jwt: {

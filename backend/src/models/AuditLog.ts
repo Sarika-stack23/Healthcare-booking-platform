@@ -55,9 +55,10 @@ const AuditLogSchema = new Schema<IAuditLogDocument>(
   },
   {
     // No updatedAt needed for audit logs — they are immutable
+    // FIX: Removed schema-level expireAfterSeconds here because it applied to
+    // 'createdAt', conflicting with the explicit TTL index on 'timestamp' below.
+    // One TTL index on the correct field (timestamp) is sufficient.
     timestamps: { createdAt: true, updatedAt: false },
-    // TTL: auto-delete logs older than 1 year
-    expireAfterSeconds: 365 * 24 * 60 * 60,
   }
 );
 
@@ -67,7 +68,9 @@ AuditLogSchema.index({ userId: 1, timestamp: -1 });
 AuditLogSchema.index({ action: 1 });
 AuditLogSchema.index({ resource: 1, resourceId: 1 });
 AuditLogSchema.index({ timestamp: -1 });
-// TTL index for auto-expiry
+
+// FIX: Single TTL index on 'timestamp' field only (removed duplicate from schema options)
+// Auto-expire audit logs after 1 year
 AuditLogSchema.index({ timestamp: 1 }, { expireAfterSeconds: 365 * 24 * 60 * 60 });
 
 // ─── Model ────────────────────────────────────────────────────────────────────

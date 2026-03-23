@@ -5,6 +5,7 @@ import { Request } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import { env } from '../config/env';
 import { ApiError } from '../utils/ApiError';
+import { logger } from '../utils/logger';
 
 // ─── Allowed MIME Types ───────────────────────────────────────────────────────
 
@@ -27,7 +28,6 @@ const localStorage = multer.diskStorage({
   destination: (_req: Request, _file: Express.Multer.File, cb) => {
     const uploadDir = env.upload.uploadPath;
 
-    // Create directory if it doesn't exist
     if (!fs.existsSync(uploadDir)) {
       fs.mkdirSync(uploadDir, { recursive: true });
     }
@@ -69,7 +69,7 @@ const fileFilter = (
 export const upload = multer({
   storage: localStorage,
   limits: {
-    fileSize: env.upload.maxFileSize, // 10MB default
+    fileSize: env.upload.maxFileSize,
     files: 1,
   },
   fileFilter,
@@ -92,8 +92,14 @@ export const deleteLocalFile = (storageKey: string): void => {
     if (fs.existsSync(storageKey)) {
       fs.unlinkSync(storageKey);
     }
-  } catch {
-    // Log but don't throw — file deletion failure shouldn't crash the app
+  } catch (error) {
+    // FIX: Added actual logger.warn call — the previous comment said "log but don't throw"
+    // but there was no logging statement, meaning silent failures went completely unnoticed.
+    // We still don't throw so file deletion failure won't crash the main request flow.
+    logger.warn('Failed to delete local file', {
+      storageKey,
+      error: (error as Error).message,
+    });
   }
 };
 

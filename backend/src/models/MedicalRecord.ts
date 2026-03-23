@@ -104,12 +104,21 @@ MedicalRecordSchema.index({ appointmentId: 1 });
 MedicalRecordSchema.index({ isDeleted: 1 });
 MedicalRecordSchema.index({ tags: 1 });
 
-MedicalRecordSchema.pre(/^find/, function (this: mongoose.Query<unknown, IMedicalRecordDocument>, next) {
+// FIX: Replaced fragile regex /^find/ hook with explicit named hooks for type safety.
+// The regex approach can silently match unexpected query methods and loses TypeScript
+// type inference on 'this'. Explicit hooks are predictable and correctly typed.
+type MedicalRecordQuery = mongoose.Query<unknown, IMedicalRecordDocument>;
+
+function excludeDeleted(this: MedicalRecordQuery): void {
   if (this.getFilter().isDeleted === undefined) {
     this.where({ isDeleted: false });
   }
-  next();
-});
+}
+
+MedicalRecordSchema.pre('find', excludeDeleted);
+MedicalRecordSchema.pre('findOne', excludeDeleted);
+MedicalRecordSchema.pre('findOneAndUpdate', excludeDeleted);
+MedicalRecordSchema.pre('countDocuments', excludeDeleted);
 
 const MedicalRecord: Model<IMedicalRecordDocument> = mongoose.model<IMedicalRecordDocument>(
   'MedicalRecord',
