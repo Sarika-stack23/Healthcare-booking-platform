@@ -23,8 +23,7 @@
 
 - [About the Project](#-about-the-project)
 - [Live Demo](#-live-demo)
-- [Screenshots](#-screenshots)
-- [Tech Stack & Languages](#-tech-stack--languages)
+- [Tech Stack](#-tech-stack--languages)
 - [Features](#-features)
 - [Architecture](#-architecture)
 - [API Overview](#-api-overview)
@@ -32,6 +31,7 @@
 - [Environment Variables](#-environment-variables)
 - [Security Features](#-security-features)
 - [Database Schema](#-database-schema)
+- [Testing](#-testing)
 - [Scripts](#-scripts)
 
 ---
@@ -47,63 +47,18 @@ The goal was to build a production-grade REST API with proper RBAC (Role-Based A
 - Doctors who need to manage their weekly availability and patient records
 - Admins who need oversight, analytics, and audit trails
 
-This project was built as a full-stack portfolio piece demonstrating production-level Node.js/TypeScript backend development, deployed live on Railway with MongoDB.
-
 ---
 
 ## 🚀 Live Demo
 
 | Resource | URL |
 |---|---|
-| 🌐 Live API Base | [`https://heathcare-booking-platform.up.railway.app/api`](https://faithful-acceptance-production-410b.up.railway.app/api) |
-| ❤️ Health Check | [`https://heathcare-booking-platform.up.railway.app/health`](https://faithful-acceptance-production-410b.up.railway.app/health) |
-| 📖 Swagger UI Docs | [`https://heathcare-booking-platform.up.railway.app/api/docs`](https://faithful-acceptance-production-410b.up.railway.app/api/docs) |
-| 🟢 Readiness Check | [`https://heathcare-booking-platform.up.railway.app/ready`](https://faithful-acceptance-production-410b.up.railway.app/ready) |
+| 🌐 Live API Base | `https://heathcare-booking-platform.up.railway.app/api` |
+| ❤️ Health Check | `https://heathcare-booking-platform.up.railway.app/health` |
+| 📖 Swagger UI Docs | `https://heathcare-booking-platform.up.railway.app/api/docs` |
+| 🟢 Readiness Check | `https://heathcare-booking-platform.up.railway.app/ready` |
 
-> **Note:** The API is live and connected to a MongoDB instance on Railway. You can test all endpoints via Swagger UI or Postman using the base URL above.
-
----
-
-## 📸 Screenshots
-
-### Railway Deployment — Service Online
-![Railway Deployment](https://img.shields.io/badge/Status-Live%20on%20Railway-brightgreen?style=for-the-badge)
-
-> The backend service `faithful-acceptance` is deployed and running on Railway in the `us-west2` region with Node.js v22.
-
-**Railway Dashboard — Service Running:**
-
-```
-Service:     faithful-acceptance
-Status:      ✅ Online
-Region:      us-west2
-Runtime:     node@22.22.1
-Replicas:    1
-Build:       NIXPACKS (TypeScript → compiled dist/)
-Start Cmd:   npm run build && npm start
-Health:      GET /health → 200 OK
-```
-
-### API Health Check Response
-```json
-{
-  "success": true,
-  "status": "healthy",
-  "timestamp": "2026-03-18T12:00:00.000Z",
-  "uptime": 3600,
-  "environment": "production"
-}
-```
-
-### Swagger API Documentation
-The full interactive API docs are available at `/api/docs` — built with `swagger-jsdoc` and `swagger-ui-express`. All endpoints are documented with request/response schemas, authentication requirements, and example payloads.
-
-### MongoDB Connected
-```
-MongoDB Connected: mongodb.railway.internal
-Database: medailockr (Railway internal network)
-Status: ✅ Connected
-```
+> The API is live and connected to a MongoDB instance on Railway. Test all endpoints via Swagger UI or Postman using the base URL above.
 
 ---
 
@@ -114,8 +69,7 @@ Status: ✅ Connected
 | Language | Usage | % |
 |---|---|---|
 | **TypeScript** | Entire backend codebase — strict mode, full type safety | ~98% |
-| **CSS** | Frontend styling (frontend directory) | ~1% |
-| **Other** | Config files, JSON schemas | ~1% |
+| **JavaScript** | Config files | ~2% |
 
 ### Backend Stack
 
@@ -200,23 +154,17 @@ Status: ✅ Connected
 ## 🏗 Architecture
 
 ```
-medailockr-api/
-├── src/
-│   ├── config/          # DB connection, env config, Swagger spec
-│   ├── models/          # Mongoose schemas (User, Appointment, Availability, etc.)
-│   ├── controllers/     # Thin req/res handlers — delegate to services
-│   ├── services/        # All business logic (auth, booking, records, etc.)
-│   ├── routes/          # Express routers per domain
-│   ├── middleware/       # Auth, RBAC, validation, upload, rate limit, error handler
-│   ├── validators/      # Zod schemas per domain
-│   ├── utils/           # Logger, JWT helpers, ApiError, AuditLog
-│   ├── types/           # Shared TypeScript interfaces
-│   └── app.ts           # Express app + server bootstrap
-├── backend/
-│   ├── railway.json     # Railway deployment config
-│   ├── tsconfig.json    # TypeScript strict config
-│   └── package.json
-└── frontend/            # Frontend (React/TypeScript)
+src/
+├── config/          # DB connection, env config, Swagger spec
+├── models/          # Mongoose schemas (User, Appointment, Availability, etc.)
+├── controllers/     # Thin req/res handlers — delegate to services
+├── services/        # All business logic (auth, booking, records, etc.)
+├── routes/          # Express routers per domain
+├── middleware/      # Auth, RBAC, validation, upload, rate limit, error handler
+├── validators/      # Zod schemas per domain
+├── utils/           # Logger, JWT helpers, ApiError, AuditLog
+├── types/           # Shared TypeScript interfaces
+└── app.ts           # Express app + server bootstrap
 ```
 
 ### Request Flow
@@ -405,7 +353,7 @@ npm start
 
 ---
 
-## 🗄 Database Schema Summary
+## 🗄 Database Schema
 
 ### Users
 Base fields: firstName, lastName, email, password (hashed), role, phone, isActive, tokenVersion
@@ -434,6 +382,21 @@ Auto-expire after 1 year via TTL index.
 userId, type (email/sms/push), template, body, recipient, status, retryCount, scheduledAt
 
 Auto-expire after 90 days via TTL index.
+
+---
+
+## 🧪 Testing
+
+```bash
+npm test
+```
+
+Test coverage includes:
+- ApiError class with all static methods
+- JWT token generation and verification
+- bcrypt password hashing and comparison
+- Zod schema validation (register, login, appointment, notification, record)
+- User model mock integration
 
 ---
 
