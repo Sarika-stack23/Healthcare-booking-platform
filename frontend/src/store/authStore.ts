@@ -1,23 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-
-export interface User {
-  _id: string;
-  firstName: string;
-  lastName: string;
-  fullName: string;
-  email: string;
-  role: 'patient' | 'doctor' | 'admin';
-  isActive: boolean;
-  isEmailVerified: boolean;
-  patientProfile?: { allergies: string[] };
-  doctorProfile?: {
-    specialization: string;
-    consultationFee: number;
-    qualifications: string[];
-  };
-  createdAt: string;
-}
+import type { User } from '../types';
 
 interface AuthState {
   user: User | null;

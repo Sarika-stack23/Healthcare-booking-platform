@@ -28,6 +28,7 @@ export interface Appointment {
   consultationFee: number;
   cancelReason?: string;
   completedAt?: string;
+  notes?: string;
   auditLog: Array<{
     action: string;
     performedBy: string;
