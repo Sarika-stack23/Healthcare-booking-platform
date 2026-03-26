@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 import api from '../../api/axios';
-import { Search, User, Stethoscope, ShieldCheck } from 'lucide-react';
+import type { User, Appointment } from '../../types/index';
+import { Search, UserIcon, Stethoscope, ShieldCheck } from 'lucide-react';
 import { format } from 'date-fns';
 
 const Users = () => {
-  const [users, setUsers] = useState<any[]>([]);
-  const [doctors, setDoctors] = useState<any[]>([]);
+  const [patients, setPatients] = useState<User[]>([]);
+  const [doctors, setDoctors] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [tab, setTab] = useState<'patients' | 'doctors'>('patients');
@@ -19,22 +20,22 @@ const Users = () => {
         ]);
         setDoctors(dRes.data.data);
         // Extract unique patients from appointments
-        const seen = new Set();
-        const patients: any[] = [];
-        pRes.data.data.forEach((a: any) => {
-          const p = a.patientId;
+        const seen = new Set<string>();
+        const patientList: User[] = [];
+        (pRes.data.data as Appointment[]).forEach((a) => {
+          const p = a.patientId as User;
           if (p?._id && !seen.has(p._id)) {
             seen.add(p._id);
-            patients.push(p);
+            patientList.push(p);
           }
         });
-        setUsers(patients);
+        setPatients(patientList);
       } catch {} finally { setLoading(false); }
     };
     fetchAll();
   }, []);
 
-  const list = tab === 'doctors' ? doctors : users;
+  const list = tab === 'doctors' ? doctors : patients;
   const filtered = list.filter(u =>
     `${u.firstName} ${u.lastName} ${u.email}`.toLowerCase().includes(search.toLowerCase())
   );
@@ -42,7 +43,7 @@ const Users = () => {
   const roleIcon = (role: string) => {
     if (role === 'doctor') return <Stethoscope size={14} className="text-purple-600" />;
     if (role === 'admin') return <ShieldCheck size={14} className="text-red-600" />;
-    return <User size={14} className="text-blue-600" />;
+    return <UserIcon size={14} className="text-blue-600" />;
   };
 
   return (
@@ -59,7 +60,7 @@ const Users = () => {
             className={`px-4 py-2 rounded-lg text-sm font-medium capitalize transition ${
               tab === t ? 'bg-blue-600 text-white' : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
             }`}>
-            {t} ({t === 'doctors' ? doctors.length : users.length})
+            {t} ({t === 'doctors' ? doctors.length : patients.length})
           </button>
         ))}
       </div>
@@ -101,7 +102,7 @@ const Users = () => {
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-1.5">
                     {roleIcon(u.role)}
-                    <span className="text-sm capitalize text-gray-700">{u.role || tab.slice(0,-1)}</span>
+                    <span className="text-sm capitalize text-gray-700">{u.role || tab.slice(0, -1)}</span>
                   </div>
                 </td>
                 <td className="px-4 py-3">

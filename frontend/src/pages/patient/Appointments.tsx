@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import api from '../../api/axios';
-import type { Appointment } from '../../types/index';
-import { Calendar, Clock, User, XCircle, RefreshCw } from 'lucide-react';
+import type { Appointment, User } from '../../types/index';
+import { Calendar, Clock, User as UserIcon, XCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import toast from 'react-hot-toast';
 
@@ -37,8 +37,9 @@ const Appointments = () => {
       setCancelId('');
       setCancelReason('');
       fetchAppointments();
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Failed to cancel');
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { message?: string } } };
+      toast.error(error.response?.data?.message || 'Failed to cancel');
     }
   };
 
@@ -71,13 +72,13 @@ const Appointments = () => {
       ) : (
         <div className="space-y-3">
           {appointments.map(appt => {
-            const doctor = appt.doctorId as any;
+            const doctor = appt.doctorId as User;
             return (
               <div key={appt._id} className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
                     <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                      <User size={20} className="text-blue-600" />
+                      <UserIcon size={20} className="text-blue-600" />
                     </div>
                     <div>
                       <p className="font-semibold text-gray-900">Dr. {doctor?.fullName}</p>

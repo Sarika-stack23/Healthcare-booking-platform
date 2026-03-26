@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import api from '../../api/axios';
 import type { MedicalRecord } from '../../types/index';
-import { FileText, Upload, Download, Trash2, Eye } from 'lucide-react';
+import { FileText, Upload, Download, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import toast from 'react-hot-toast';
 
@@ -50,15 +50,16 @@ const Records = () => {
       setShowUpload(false);
       setTitle(''); setDescription(''); setFile(null); setRecordType('lab_report');
       fetchRecords();
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Upload failed');
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { message?: string } } };
+      toast.error(error.response?.data?.message || 'Upload failed');
     } finally { setUploading(false); }
   };
 
-  const handleDownload = async (id: string, name: string) => {
+  const handleDownload = async (id: string) => {
     try {
       const res = await api.get(`/records/${id}/download`);
-      const url = res.data.data.url;
+      const url: string = res.data.data.url;
       window.open(url, '_blank');
     } catch { toast.error('Download failed'); }
   };
@@ -117,7 +118,7 @@ const Records = () => {
                     <p className="text-xs text-gray-400">{record.file.originalName}</p>
                   </div>
                 </div>
-                <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${recordTypeColors[record.recordType]}`}>
+                <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${recordTypeColors[record.recordType] || recordTypeColors.other}`}>
                   {record.recordType.replace('_', ' ')}
                 </span>
               </div>
@@ -132,7 +133,7 @@ const Records = () => {
               </div>
 
               <div className="flex gap-2">
-                <button onClick={() => handleDownload(record._id, record.file.originalName)}
+                <button onClick={() => handleDownload(record._id)}
                   className="flex-1 flex items-center justify-center gap-1.5 py-2 text-sm text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-50 transition">
                   <Download size={14} /> Download
                 </button>

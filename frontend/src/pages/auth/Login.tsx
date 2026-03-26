@@ -29,8 +29,9 @@ const Login = () => {
       if (user.role === 'doctor') navigate('/doctor/dashboard');
       else if (user.role === 'admin') navigate('/admin/dashboard');
       else navigate('/dashboard');
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Login failed');
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { message?: string } } };
+      toast.error(error.response?.data?.message || 'Login failed');
     }
   };
 
@@ -84,7 +85,7 @@ const Login = () => {
         </form>
 
         <p className="text-center text-sm text-gray-500 mt-6">
-          Don't have an account?{' '}
+          Don&apos;t have an account?{' '}
           <Link to="/register" className="text-blue-600 font-medium hover:underline">
             Sign up
           </Link>

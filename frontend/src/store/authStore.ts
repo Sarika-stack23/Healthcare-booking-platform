@@ -20,16 +20,27 @@ export const useAuthStore = create<AuthState>()(
       refreshToken: null,
       isAuthenticated: false,
       setAuth: (user, accessToken, refreshToken) => {
+        // Keep localStorage in sync for the axios interceptor
         localStorage.setItem('accessToken', accessToken);
         localStorage.setItem('refreshToken', refreshToken);
         set({ user, accessToken, refreshToken, isAuthenticated: true });
       },
       logout: () => {
-        localStorage.clear();
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
         set({ user: null, accessToken: null, refreshToken: null, isAuthenticated: false });
       },
       updateUser: (user) => set({ user }),
     }),
-    { name: 'auth-storage' }
+    {
+      name: 'auth-storage',
+      // Only persist user and auth status; tokens stay in localStorage for interceptor
+      partialize: (state) => ({
+        user: state.user,
+        accessToken: state.accessToken,
+        refreshToken: state.refreshToken,
+        isAuthenticated: state.isAuthenticated,
+      }),
+    }
   )
 );

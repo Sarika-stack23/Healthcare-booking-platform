@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useAuthStore } from '../../store/authStore';
 import api from '../../api/axios';
-import type { Appointment } from '../../types/index';
-import { Calendar, CheckCircle, Clock, XCircle, User } from 'lucide-react';
+import type { Appointment, User } from '../../types/index';
+import { Calendar, CheckCircle, Clock, XCircle, User as UserIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import toast from 'react-hot-toast';
 
@@ -27,8 +27,9 @@ const DoctorDashboard = () => {
       await api.put(`/appointments/${id}/complete`, { notes: 'Consultation completed' });
       toast.success('Marked as completed');
       fetchAppointments();
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Failed');
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { message?: string } } };
+      toast.error(error.response?.data?.message || 'Failed');
     } finally { setCompleting(''); }
   };
 
@@ -81,12 +82,12 @@ const DoctorDashboard = () => {
           ) : appointments.length === 0 ? (
             <div className="p-8 text-center text-gray-400">No appointments yet</div>
           ) : appointments.map(appt => {
-            const patient = appt.patientId as any;
+            const patient = appt.patientId as User;
             return (
               <div key={appt._id} className="flex items-center justify-between p-4 hover:bg-gray-50">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                    <User size={18} className="text-green-600" />
+                    <UserIcon size={18} className="text-green-600" />
                   </div>
                   <div>
                     <p className="font-medium text-gray-900 text-sm">{patient?.fullName}</p>

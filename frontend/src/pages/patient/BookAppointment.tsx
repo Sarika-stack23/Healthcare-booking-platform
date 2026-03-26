@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../../api/axios';
-;
+import type { User } from '../../types/index';
 import { Calendar, Clock, User as UserIcon, ChevronLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { format, addDays } from 'date-fns';
@@ -62,8 +62,9 @@ const BookAppointment = () => {
       });
       toast.success('Appointment booked successfully!');
       navigate('/appointments');
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Booking failed');
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { message?: string } } };
+      toast.error(error.response?.data?.message || 'Booking failed');
     } finally { setLoading(false); }
   };
 

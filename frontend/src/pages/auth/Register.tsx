@@ -40,8 +40,9 @@ const Register = () => {
       toast.success('Account created successfully!');
       if (user.role === 'doctor') navigate('/doctor/dashboard');
       else navigate('/dashboard');
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Registration failed');
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { message?: string } } };
+      toast.error(error.response?.data?.message || 'Registration failed');
     }
   };
 

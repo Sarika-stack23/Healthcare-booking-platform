@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 import api from '../../api/axios';
-import { Users, Calendar, CheckCircle, XCircle, UserCheck, Stethoscope } from 'lucide-react';
+import type { Appointment, User } from '../../types/index';
+import { Calendar, CheckCircle, XCircle, Stethoscope } from 'lucide-react';
 import { format } from 'date-fns';
 
 const AdminDashboard = () => {
-  const [appointments, setAppointments] = useState<any[]>([]);
-  const [users, setUsers] = useState<any[]>([]);
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [doctors, setDoctors] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -16,7 +17,7 @@ const AdminDashboard = () => {
           api.get('/users/doctors'),
         ]);
         setAppointments(apptRes.data.data);
-        setUsers(usersRes.data.data);
+        setDoctors(usersRes.data.data);
       } catch {} finally { setLoading(false); }
     };
     fetchData();
@@ -27,7 +28,7 @@ const AdminDashboard = () => {
     scheduled: appointments.filter(a => a.status === 'scheduled').length,
     completed: appointments.filter(a => a.status === 'completed').length,
     cancelled: appointments.filter(a => a.status === 'cancelled').length,
-    doctors: users.length,
+    doctorCount: doctors.length,
   };
 
   const statusColor: Record<string, string> = {
@@ -51,7 +52,7 @@ const AdminDashboard = () => {
           { label: 'Scheduled', value: stats.scheduled, icon: Calendar, color: 'indigo' },
           { label: 'Completed', value: stats.completed, icon: CheckCircle, color: 'green' },
           { label: 'Cancelled', value: stats.cancelled, icon: XCircle, color: 'red' },
-          { label: 'Doctors', value: stats.doctors, icon: Stethoscope, color: 'purple' },
+          { label: 'Doctors', value: stats.doctorCount, icon: Stethoscope, color: 'purple' },
         ].map(({ label, value, icon: Icon, color }) => (
           <div key={label} className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
             <div className={`w-10 h-10 bg-${color}-100 rounded-lg flex items-center justify-center mb-3`}>
@@ -73,8 +74,8 @@ const AdminDashboard = () => {
             {loading ? (
               <div className="p-6 text-center text-gray-400">Loading...</div>
             ) : appointments.slice(0, 10).map(appt => {
-              const patient = appt.patientId as any;
-              const doctor = appt.doctorId as any;
+              const patient = appt.patientId as User;
+              const doctor = appt.doctorId as User;
               return (
                 <div key={appt._id} className="p-4">
                   <div className="flex items-center justify-between mb-1">
@@ -83,7 +84,9 @@ const AdminDashboard = () => {
                       {appt.status}
                     </span>
                   </div>
-                  <p className="text-xs text-gray-500">Dr. {doctor?.fullName} • {appt.scheduledTime} • {format(new Date(appt.scheduledDate), 'MMM dd')}</p>
+                  <p className="text-xs text-gray-500">
+                    Dr. {doctor?.fullName} • {appt.scheduledTime} • {format(new Date(appt.scheduledDate), 'MMM dd')}
+                  </p>
                 </div>
               );
             })}
@@ -96,7 +99,7 @@ const AdminDashboard = () => {
             <h2 className="font-semibold text-gray-900">Registered Doctors</h2>
           </div>
           <div className="divide-y divide-gray-50 max-h-80 overflow-auto">
-            {users.map(doc => (
+            {doctors.map(doc => (
               <div key={doc._id} className="flex items-center gap-3 p-4">
                 <div className="w-9 h-9 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0">
                   <span className="text-purple-600 font-medium text-sm">

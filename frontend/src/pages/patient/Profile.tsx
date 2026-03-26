@@ -5,9 +5,15 @@ import api from '../../api/axios';
 import toast from 'react-hot-toast';
 import { User, Mail, Phone, Save } from 'lucide-react';
 
+interface ProfileFormData {
+  firstName: string;
+  lastName: string;
+  phone: string;
+}
+
 const Profile = () => {
   const { user, updateUser } = useAuthStore();
-  const { register, handleSubmit, reset, formState: { isSubmitting, isDirty } } = useForm({
+  const { register, handleSubmit, reset, formState: { isSubmitting, isDirty } } = useForm<ProfileFormData>({
     defaultValues: {
       firstName: user?.firstName || '',
       lastName: user?.lastName || '',
@@ -16,16 +22,17 @@ const Profile = () => {
   });
 
   useEffect(() => {
-    reset({ firstName: user?.firstName, lastName: user?.lastName, phone: '' });
-  }, [user]);
+    reset({ firstName: user?.firstName || '', lastName: user?.lastName || '', phone: '' });
+  }, [user, reset]);
 
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: ProfileFormData) => {
     try {
       const res = await api.put('/users/profile', data);
       updateUser(res.data.data.user);
       toast.success('Profile updated!');
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Update failed');
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { message?: string } } };
+      toast.error(error.response?.data?.message || 'Update failed');
     }
   };
 
