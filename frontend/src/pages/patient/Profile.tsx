@@ -4,6 +4,7 @@ import { useAuthStore } from '../../store/authStore';
 import api from '../../api/axios';
 import toast from 'react-hot-toast';
 import { User, Mail, Phone, Save } from 'lucide-react';
+import type { User as UserType } from '../../types';
 
 interface ProfileFormData {
   firstName: string;
@@ -13,26 +14,36 @@ interface ProfileFormData {
 
 const Profile = () => {
   const { user, updateUser } = useAuthStore();
-  const { register, handleSubmit, reset, formState: { isSubmitting, isDirty } } = useForm<ProfileFormData>({
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { isSubmitting, isDirty },
+  } = useForm<ProfileFormData>({
     defaultValues: {
-      firstName: user?.firstName || '',
-      lastName: user?.lastName || '',
+      firstName: user?.firstName ?? '',
+      lastName: user?.lastName ?? '',
       phone: '',
-    }
+    },
   });
 
   useEffect(() => {
-    reset({ firstName: user?.firstName || '', lastName: user?.lastName || '', phone: '' });
+    reset({
+      firstName: user?.firstName ?? '',
+      lastName: user?.lastName ?? '',
+      phone: '',
+    });
   }, [user, reset]);
 
   const onSubmit = async (data: ProfileFormData) => {
     try {
       const res = await api.put('/users/profile', data);
-      updateUser(res.data.data.user);
+      // Fixed: explicit type cast so updateUser gets the correct User type
+      updateUser(res.data.data.user as UserType);
       toast.success('Profile updated!');
     } catch (err: unknown) {
-      const error = err as { response?: { data?: { message?: string } } };
-      toast.error(error.response?.data?.message || 'Update failed');
+      const axiosMsg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      toast.error(axiosMsg ?? 'Update failed');
     }
   };
 
@@ -51,9 +62,13 @@ const Profile = () => {
           <div>
             <h2 className="text-xl font-semibold text-gray-900">{user?.fullName}</h2>
             <p className="text-gray-500 capitalize">{user?.role}</p>
-            <span className={`inline-block mt-1 px-2 py-0.5 rounded-full text-xs ${
-              user?.isEmailVerified ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
-            }`}>
+            <span
+              className={`inline-block mt-1 px-2 py-0.5 rounded-full text-xs ${
+                user?.isEmailVerified
+                  ? 'bg-green-100 text-green-700'
+                  : 'bg-yellow-100 text-yellow-700'
+              }`}
+            >
               {user?.isEmailVerified ? '✓ Verified' : 'Not verified'}
             </span>
           </div>
@@ -62,17 +77,25 @@ const Profile = () => {
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                First Name
+              </label>
               <div className="relative">
                 <User size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                <input {...register('firstName')}
-                  className="w-full pl-9 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" />
+                <input
+                  {...register('firstName')}
+                  className="w-full pl-9 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                />
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
-              <input {...register('lastName')}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" />
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Last Name
+              </label>
+              <input
+                {...register('lastName')}
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+              />
             </div>
           </div>
 
@@ -80,8 +103,11 @@ const Profile = () => {
             <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
             <div className="relative">
               <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-              <input value={user?.email} disabled
-                className="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-lg bg-gray-50 text-gray-500 text-sm cursor-not-allowed" />
+              <input
+                value={user?.email ?? ''}
+                disabled
+                className="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-lg bg-gray-50 text-gray-500 text-sm cursor-not-allowed"
+              />
             </div>
           </div>
 
@@ -89,8 +115,11 @@ const Profile = () => {
             <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
             <div className="relative">
               <Phone size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-              <input {...register('phone')} placeholder="+91 9876543210"
-                className="w-full pl-9 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" />
+              <input
+                {...register('phone')}
+                placeholder="+91 9876543210"
+                className="w-full pl-9 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+              />
             </div>
           </div>
 
@@ -101,8 +130,11 @@ const Profile = () => {
             </span>
           </div>
 
-          <button type="submit" disabled={isSubmitting || !isDirty}
-            className="flex items-center gap-2 bg-blue-600 text-white px-6 py-2.5 rounded-lg hover:bg-blue-700 disabled:opacity-50 transition font-medium text-sm">
+          <button
+            type="submit"
+            disabled={isSubmitting || !isDirty}
+            className="flex items-center gap-2 bg-blue-600 text-white px-6 py-2.5 rounded-lg hover:bg-blue-700 disabled:opacity-50 transition font-medium text-sm"
+          >
             <Save size={16} />
             {isSubmitting ? 'Saving...' : 'Save Changes'}
           </button>

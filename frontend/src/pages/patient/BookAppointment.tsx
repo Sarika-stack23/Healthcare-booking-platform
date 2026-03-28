@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../../api/axios';
-import type { User } from '../../types/index';
+import type { User } from '../../types';
 import { Calendar, Clock, User as UserIcon, ChevronLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { format, addDays } from 'date-fns';
@@ -17,21 +17,30 @@ const BookAppointment = () => {
   const [loading, setLoading] = useState(false);
   const [slotsLoading, setSlotsLoading] = useState(false);
 
-  // Generate next 7 working days
-  const dates = Array.from({ length: 14 }, (_, i) => {
+  // Generate next 10 working days (skip weekends)
+  const dates = Array.from({ length: 21 }, (_, i) => {
     const d = addDays(new Date(), i + 1);
-    return { value: format(d, 'yyyy-MM-dd'), label: format(d, 'EEE, MMM dd'), day: d.getDay() };
-  }).filter(d => d.day !== 0 && d.day !== 6);
+    return {
+      value: format(d, 'yyyy-MM-dd'),
+      label: format(d, 'EEE, MMM dd'),
+      day: d.getDay(),
+    };
+  })
+    .filter(d => d.day !== 0 && d.day !== 6)
+    .slice(0, 10);
 
   useEffect(() => {
     const fetchDoctor = async () => {
       try {
         const res = await api.get(`/users/doctors/${doctorId}`);
-        setDoctor(res.data.data.doctor);
-      } catch { toast.error('Doctor not found'); navigate('/doctors'); }
+        setDoctor(res.data.data.doctor as User);
+      } catch {
+        toast.error('Doctor not found');
+        navigate('/doctors');
+      }
     };
     fetchDoctor();
-  }, [doctorId]);
+  }, [doctorId, navigate]);
 
   useEffect(() => {
     if (!selectedDate) return;
@@ -39,12 +48,18 @@ const BookAppointment = () => {
       setSlotsLoading(true);
       setSelectedSlot('');
       try {
-        const res = await api.get(`/doctors/${doctorId}/available-slots?date=${selectedDate}`);
-        setSlots(res.data.data.slots);
-      } catch { setSlots([]); } finally { setSlotsLoading(false); }
+        const res = await api.get(
+          `/doctors/${doctorId}/available-slots?date=${selectedDate}`
+        );
+        setSlots(res.data.data.slots as string[]);
+      } catch {
+        setSlots([]);
+      } finally {
+        setSlotsLoading(false);
+      }
     };
     fetchSlots();
-  }, [selectedDate]);
+  }, [selectedDate, doctorId]);
 
   const handleBook = async () => {
     if (!selectedDate || !selectedSlot || !reason.trim()) {
@@ -63,15 +78,19 @@ const BookAppointment = () => {
       toast.success('Appointment booked successfully!');
       navigate('/appointments');
     } catch (err: unknown) {
-      const error = err as { response?: { data?: { message?: string } } };
-      toast.error(error.response?.data?.message || 'Booking failed');
-    } finally { setLoading(false); }
+      const axiosMsg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      toast.error(axiosMsg ?? 'Booking failed');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
-      <button onClick={() => navigate('/doctors')}
-        className="flex items-center gap-2 text-gray-500 hover:text-gray-900 transition">
+      <button
+        onClick={() => navigate('/doctors')}
+        className="flex items-center gap-2 text-gray-500 hover:text-gray-900 transition"
+      >
         <ChevronLeft size={18} /> Back to Doctors
       </button>
 
@@ -88,7 +107,9 @@ const BookAppointment = () => {
           <div>
             <h2 className="font-semibold text-gray-900 text-lg">Dr. {doctor.fullName}</h2>
             <p className="text-blue-600">{doctor.doctorProfile?.specialization}</p>
-            <p className="text-gray-500 text-sm">₹{doctor.doctorProfile?.consultationFee} per consultation</p>
+            <p className="text-gray-500 text-sm">
+              ₹{doctor.doctorProfile?.consultationFee} per consultation
+            </p>
           </div>
         </div>
       )}
@@ -101,12 +122,15 @@ const BookAppointment = () => {
           </label>
           <div className="grid grid-cols-5 gap-2">
             {dates.map(({ value, label }) => (
-              <button key={value} onClick={() => setSelectedDate(value)}
+              <button
+                key={value}
+                onClick={() => setSelectedDate(value)}
                 className={`p-2.5 rounded-lg text-xs font-medium border transition ${
                   selectedDate === value
                     ? 'bg-blue-600 text-white border-blue-600'
                     : 'bg-white text-gray-700 border-gray-200 hover:border-blue-400'
-                }`}>
+                }`}
+              >
                 {label}
               </button>
             ))}
@@ -126,12 +150,15 @@ const BookAppointment = () => {
             ) : (
               <div className="grid grid-cols-6 gap-2">
                 {slots.map(slot => (
-                  <button key={slot} onClick={() => setSelectedSlot(slot)}
+                  <button
+                    key={slot}
+                    onClick={() => setSelectedSlot(slot)}
                     className={`py-2 rounded-lg text-sm font-medium border transition ${
                       selectedSlot === slot
                         ? 'bg-blue-600 text-white border-blue-600'
                         : 'bg-white text-gray-700 border-gray-200 hover:border-blue-400'
-                    }`}>
+                    }`}
+                  >
                     {slot}
                   </button>
                 ))}
@@ -154,18 +181,23 @@ const BookAppointment = () => {
           />
         </div>
 
-        {/* Summary */}
+        {/* Summary — Fixed: T00:00:00 appended to avoid UTC timezone off-by-one */}
         {selectedDate && selectedSlot && (
           <div className="bg-blue-50 rounded-lg p-4 text-sm">
             <p className="font-medium text-blue-900 mb-1">Booking Summary</p>
-            <p className="text-blue-700">📅 {format(new Date(selectedDate), 'EEEE, MMMM dd yyyy')}</p>
+            <p className="text-blue-700">
+              📅 {format(new Date(selectedDate + 'T00:00:00'), 'EEEE, MMMM dd yyyy')}
+            </p>
             <p className="text-blue-700">⏰ {selectedSlot}</p>
             <p className="text-blue-700">💰 ₹{doctor?.doctorProfile?.consultationFee}</p>
           </div>
         )}
 
-        <button onClick={handleBook} disabled={loading || !selectedDate || !selectedSlot || !reason}
-          className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition">
+        <button
+          onClick={handleBook}
+          disabled={loading || !selectedDate || !selectedSlot || !reason.trim()}
+          className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+        >
           {loading ? 'Booking...' : 'Confirm Appointment'}
         </button>
       </div>

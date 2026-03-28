@@ -2,7 +2,7 @@ import { NavLink } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import {
   LayoutDashboard, Calendar, Users, FileText,
-  Clock, UserCircle, BarChart3, ShieldCheck
+  Clock, UserCircle, ShieldCheck,
 } from 'lucide-react';
 
 const patientLinks = [
@@ -24,7 +24,6 @@ const adminLinks = [
   { to: '/admin/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { to: '/admin/users', icon: Users, label: 'Users' },
   { to: '/admin/appointments', icon: Calendar, label: 'Appointments' },
-  { to: '/admin/analytics', icon: BarChart3, label: 'Analytics' },
 ];
 
 const Sidebar = () => {

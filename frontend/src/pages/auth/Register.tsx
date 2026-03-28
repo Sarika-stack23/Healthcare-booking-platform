@@ -6,12 +6,16 @@ import { useAuthStore } from '../../store/authStore';
 import api from '../../api/axios';
 import toast from 'react-hot-toast';
 import { useState } from 'react';
+import type { User } from '../../types';
 
 const schema = z.object({
   firstName: z.string().min(2, 'First name required'),
   lastName: z.string().min(2, 'Last name required'),
   email: z.string().email('Invalid email'),
-  password: z.string().min(8, 'Min 8 characters').regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, 'Must include uppercase, lowercase, number'),
+  password: z
+    .string()
+    .min(8, 'Min 8 characters')
+    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, 'Must include uppercase, lowercase, number'),
   confirmPassword: z.string(),
   role: z.enum(['patient', 'doctor']),
   specialization: z.string().optional(),
@@ -27,7 +31,12 @@ const Register = () => {
   const navigate = useNavigate();
   const { setAuth } = useAuthStore();
   const [role, setRole] = useState<'patient' | 'doctor'>('patient');
-  const { register, handleSubmit, setValue, formState: { errors, isSubmitting } } = useForm<FormData>({
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    formState: { errors, isSubmitting },
+  } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: { role: 'patient' },
   });
@@ -35,14 +44,19 @@ const Register = () => {
   const onSubmit = async (data: FormData) => {
     try {
       const res = await api.post('/auth/register', data);
-      const { user, accessToken, refreshToken } = res.data.data;
+      const { user, accessToken, refreshToken } = res.data.data as {
+        user: User;
+        accessToken: string;
+        refreshToken: string;
+      };
       setAuth(user, accessToken, refreshToken);
       toast.success('Account created successfully!');
+      // Fixed: doctors go to doctor dashboard, not patient dashboard
       if (user.role === 'doctor') navigate('/doctor/dashboard');
       else navigate('/dashboard');
     } catch (err: unknown) {
-      const error = err as { response?: { data?: { message?: string } } };
-      toast.error(error.response?.data?.message || 'Registration failed');
+      const axiosMsg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      toast.error(axiosMsg ?? 'Registration failed');
     }
   };
 
@@ -76,57 +90,97 @@ const Register = () => {
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <input {...register('firstName')} placeholder="First name"
-                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" />
-              {errors.firstName && <p className="text-red-500 text-xs mt-1">{errors.firstName.message}</p>}
+              <input
+                {...register('firstName')}
+                placeholder="First name"
+                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+              />
+              {errors.firstName && (
+                <p className="text-red-500 text-xs mt-1">{errors.firstName.message}</p>
+              )}
             </div>
             <div>
-              <input {...register('lastName')} placeholder="Last name"
-                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" />
-              {errors.lastName && <p className="text-red-500 text-xs mt-1">{errors.lastName.message}</p>}
+              <input
+                {...register('lastName')}
+                placeholder="Last name"
+                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+              />
+              {errors.lastName && (
+                <p className="text-red-500 text-xs mt-1">{errors.lastName.message}</p>
+              )}
             </div>
           </div>
 
           <div>
-            <input {...register('email')} type="email" placeholder="Email address"
-              className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" />
-            {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>}
+            <input
+              {...register('email')}
+              type="email"
+              placeholder="Email address"
+              className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+            />
+            {errors.email && (
+              <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>
+            )}
           </div>
 
           <div>
-            <input {...register('password')} type="password" placeholder="Password"
-              className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" />
-            {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>}
+            <input
+              {...register('password')}
+              type="password"
+              placeholder="Password"
+              className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+            />
+            {errors.password && (
+              <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>
+            )}
           </div>
 
           <div>
-            <input {...register('confirmPassword')} type="password" placeholder="Confirm password"
-              className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" />
-            {errors.confirmPassword && <p className="text-red-500 text-xs mt-1">{errors.confirmPassword.message}</p>}
+            <input
+              {...register('confirmPassword')}
+              type="password"
+              placeholder="Confirm password"
+              className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+            />
+            {errors.confirmPassword && (
+              <p className="text-red-500 text-xs mt-1">{errors.confirmPassword.message}</p>
+            )}
           </div>
 
           {role === 'doctor' && (
             <>
               <div>
-                <input {...register('specialization')} placeholder="Specialization (e.g. Cardiology)"
-                  className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" />
+                <input
+                  {...register('specialization')}
+                  placeholder="Specialization (e.g. Cardiology)"
+                  className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                />
               </div>
               <div>
-                <input {...register('consultationFee', { valueAsNumber: true })} type="number" placeholder="Consultation fee (₹)"
-                  className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" />
+                <input
+                  {...register('consultationFee', { valueAsNumber: true })}
+                  type="number"
+                  placeholder="Consultation fee (₹)"
+                  className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                />
               </div>
             </>
           )}
 
-          <button type="submit" disabled={isSubmitting}
-            className="w-full bg-blue-600 text-white py-2.5 rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 transition mt-2">
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="w-full bg-blue-600 text-white py-2.5 rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 transition mt-2"
+          >
             {isSubmitting ? 'Creating account...' : 'Create Account'}
           </button>
         </form>
 
         <p className="text-center text-sm text-gray-500 mt-4">
           Already have an account?{' '}
-          <Link to="/login" className="text-blue-600 font-medium hover:underline">Sign in</Link>
+          <Link to="/login" className="text-blue-600 font-medium hover:underline">
+            Sign in
+          </Link>
         </p>
       </div>
     </div>
