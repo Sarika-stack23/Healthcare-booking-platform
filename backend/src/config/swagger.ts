@@ -15,7 +15,7 @@ const options: swaggerJsdoc.Options = {
     },
     servers: [
       { url: 'http://localhost:5001/api', description: 'Local development' },
-      { url: 'https://your-app.railway.app/api', description: 'Production' },
+      { url: 'https://heathcare-booking-platform.up.railway.app/api', description: 'Production' },
     ],
     components: {
       securitySchemes: {
