@@ -122,7 +122,7 @@ const Doctors = () => {
                   <div className={`w-16 h-16 ${col.bg} rounded-full flex items-center justify-center mx-auto mb-3`}>
                     <span className={`${col.text} font-bold text-xl`}>{inits}</span>
                   </div>
-                  <h3 className="font-semibold text-gray-900 leading-tight">Dr. {name}</h3>
+                  <h3 className="font-semibold text-gray-900 leading-tight">{name.startsWith('Dr.') ? name : `Dr. ${name}`}</h3>
                   <p className="text-blue-600 text-sm mt-0.5">{spec}</p>
                 </div>
 

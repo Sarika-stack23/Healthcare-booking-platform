@@ -218,7 +218,7 @@ const BookAppointment = () => {
             <div className="space-y-1">
               <p className="text-blue-700">📅 {format(new Date(selectedDate + 'T00:00:00'), 'EEEE, MMMM dd yyyy')}</p>
               <p className="text-blue-700">⏰ {selectedSlot}</p>
-              <p className="text-blue-700">👨‍⚕️ Dr. {displayName}</p>
+              <p className="text-blue-700">👨‍⚕️ {displayName.startsWith('Dr.') ? displayName : `Dr. ${displayName}`}</p>
               <p className="text-blue-700">💰 ₹{displayFee}</p>
             </div>
           </div>
