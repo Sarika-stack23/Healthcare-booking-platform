@@ -70,9 +70,7 @@ const Records = () => {
       formData.append('title', title);
       formData.append('recordType', recordType);
       formData.append('description', description);
-      await api.post('/records/upload', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
+      await api.post('/records/upload', formData);
       toast.success('Record uploaded!');
       closeModal();
       void fetchRecords();

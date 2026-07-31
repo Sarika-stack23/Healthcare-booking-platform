@@ -6,10 +6,17 @@ const api = axios.create({
   headers: { 'Content-Type': 'application/json' },
 });
 
-// Auto-attach token to every request
+// Auto-attach token to every request and handle FormData
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('accessToken');
   if (token) config.headers.Authorization = `Bearer ${token}`;
+  
+  // If we are uploading a file via FormData, delete the global Content-Type 
+  // so the browser automatically sets 'multipart/form-data; boundary=...'
+  if (config.data instanceof FormData) {
+    delete config.headers['Content-Type'];
+  }
+  
   return config;
 });
 

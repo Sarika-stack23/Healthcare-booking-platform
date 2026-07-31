@@ -47,7 +47,6 @@ const BookAppointment = () => {
     const d = addDays(new Date(), i + 1);
     return { value: format(d, 'yyyy-MM-dd'), label: format(d, 'EEE, MMM dd'), day: d.getDay() };
   })
-    .filter(d => d.day !== 0 && d.day !== 6)
     .slice(0, 10);
 
   useEffect(() => {
