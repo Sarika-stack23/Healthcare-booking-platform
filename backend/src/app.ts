@@ -227,7 +227,6 @@ const startServer = async (): Promise<void> => {
       void shutdown('unhandledRejection');
     });
 
-    // Uncaught exceptions
     process.on('uncaughtException', (error: Error) => {
       logger.error('Uncaught Exception:', error);
       void shutdown('uncaughtException');
@@ -239,6 +238,10 @@ const startServer = async (): Promise<void> => {
   }
 };
 
-void startServer();
+// Only start the server locally or in non-serverless environments.
+// Vercel serverless functions will import the app and handle routing directly.
+if (process.env.NODE_ENV !== 'production' || process.env.START_SERVER === 'true') {
+  void startServer();
+}
 
 export default app;
