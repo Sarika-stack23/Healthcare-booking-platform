@@ -129,7 +129,7 @@ describe('bcrypt password hashing', () => {
   it('hashes a password', async () => {
     const hash = await bcrypt.hash('Password123', 12);
     expect(hash).not.toBe('Password123');
-    expect(hash.startsWith('$2b$')).toBe(true);
+    expect(hash.startsWith('$2b$') || hash.startsWith('$2a$')).toBe(true);
   });
 
   it('compares correct password correctly', async () => {

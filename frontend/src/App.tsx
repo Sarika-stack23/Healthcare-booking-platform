@@ -24,6 +24,7 @@ import Schedule from './pages/doctor/Schedule';
 import AdminDashboard from './pages/admin/Dashboard';
 import Users from './pages/admin/Users';
 
+import Unauthorized from './pages/Unauthorized';
 import NotFound from './pages/NotFound';
 
 const App = () => {
@@ -116,6 +117,7 @@ const App = () => {
           user?.role === 'doctor' ? '/doctor/dashboard' :
           user?.role === 'admin' ? '/admin/dashboard' : '/dashboard'
         ) : '/login'} />} />
+        <Route path="/unauthorized" element={<Unauthorized />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>

@@ -23,7 +23,7 @@ export interface Appointment {
   scheduledDate: string;
   scheduledTime: string;
   durationMinutes: number;
-  status: 'scheduled' | 'completed' | 'cancelled' | 'rescheduled';
+  status: 'scheduled' | 'confirmed' | 'completed' | 'cancelled' | 'no_show';
   reasonForVisit: string;
   consultationFee: number;
   cancelReason?: string;

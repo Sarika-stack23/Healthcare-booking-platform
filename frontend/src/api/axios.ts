@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { useAuthStore } from '../store/authStore';
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:5001/api',
@@ -33,14 +34,21 @@ api.interceptors.response.use(
           accessToken: string;
           refreshToken: string;
         };
-        localStorage.setItem('accessToken', accessToken);
-        localStorage.setItem('refreshToken', newRefresh);
+        
+        // Sync Zustand store
+        const user = useAuthStore.getState().user;
+        if (user) {
+          useAuthStore.getState().setAuth(user, accessToken, newRefresh);
+        } else {
+          localStorage.setItem('accessToken', accessToken);
+          localStorage.setItem('refreshToken', newRefresh);
+        }
+        
         original.headers.Authorization = `Bearer ${accessToken}`;
         return api(original);
       } catch {
-        // Only remove tokens, not entire localStorage
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
+        // Sync logout to Zustand store
+        useAuthStore.getState().logout();
         window.location.href = '/login';
       }
     }

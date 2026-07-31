@@ -29,7 +29,7 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await api.get('/appointments?limit=5');
+        const res = await api.get('/appointments?limit=100');
         const appts: Appointment[] = res.data.data;
         setAppointments(appts);
         setStats({
@@ -109,7 +109,7 @@ const Dashboard = () => {
                 </Link>
               </div>
             ) : (
-              appointments.map((appt) => {
+              appointments.slice(0, 5).map((appt) => {
                 const doctor = appt.doctorId as User;
                 return (
                   <div

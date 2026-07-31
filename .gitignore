@@ -1,0 +1,34 @@
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Logs
+logs/
+*.log
+
+# Uploads
+uploads/
+
+# Coverage
+coverage/
+
+# Local MongoDB files
+*.wt
+WiredTiger*
+journal/
+diagnostic.data/
+mongod.lock
+storage.bson
+_mdb_catalog.wt
+sizeStorer.wt
