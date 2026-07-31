@@ -17,14 +17,16 @@ const consoleFormat = winston.format.combine(
   })
 );
 
-export const logger = winston.createLogger({
-  level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
-  format: logFormat,
-  defaultMeta: { service: 'medailockr-api' },
-  transports: [
-    new winston.transports.Console({
-      format: consoleFormat,
-    }),
+const transports: winston.transport[] = [
+  new winston.transports.Console({
+    format: consoleFormat,
+  }),
+];
+
+// Only add file transports in non-serverless environments
+// Vercel has a read-only filesystem — writing to logs/ would crash the function
+if (!process.env.VERCEL) {
+  transports.push(
     new winston.transports.File({
       filename: path.join('logs', 'error.log'),
       level: 'error',
@@ -35,8 +37,15 @@ export const logger = winston.createLogger({
       filename: path.join('logs', 'combined.log'),
       maxsize: 5242880,
       maxFiles: 5,
-    }),
-  ],
+    })
+  );
+}
+
+export const logger = winston.createLogger({
+  level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
+  format: logFormat,
+  defaultMeta: { service: 'medailockr-api' },
+  transports,
 });
 
 export const logRequest = (
