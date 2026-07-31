@@ -14,28 +14,58 @@
 [![Tests](https://img.shields.io/badge/Tests-32%20Passing-brightgreen?style=flat-square&logo=jest)](./backend/src/__tests__)
 [![API Endpoints](https://img.shields.io/badge/API_Endpoints-36-blue?style=flat-square)](./backend/src/routes)
 [![Build](https://img.shields.io/badge/Build-Passing-brightgreen?style=flat-square&logo=vite)](./frontend)
-[![Code Style](https://img.shields.io/badge/Code_Style-Strict_TS-3178C6?style=flat-square&logo=typescript)](./backend/tsconfig.json)
+[![Deployed](https://img.shields.io/badge/Deployed-Vercel-black?style=flat-square&logo=vercel)](https://healthcare-booking-platform-ten.vercel.app)
 
 **A production-grade healthcare platform** with conflict-free appointment booking, role-based access control, medical record management, and real-time slot availability — built with TypeScript strict mode end-to-end.
 
-[📖 API Docs](https://heathcare-booking-platform.up.railway.app/api/docs) · [🐛 Report Bug](https://github.com/Sarika-stack23/Healthcare-booking-platform/issues) · [✨ Request Feature](https://github.com/Sarika-stack23/Healthcare-booking-platform/issues)
+### 🌐 Live Demo
+
+| | URL |
+|---|---|
+| 🖥️ **Frontend** | [healthcare-booking-platform-ten.vercel.app](https://healthcare-booking-platform-ten.vercel.app) |
+| ⚙️ **Backend API** | [healthcare-booking-platform-tl1j.vercel.app/api](https://healthcare-booking-platform-tl1j.vercel.app/api) |
+| 💚 **Health Check** | [healthcare-booking-platform-tl1j.vercel.app/health](https://healthcare-booking-platform-tl1j.vercel.app/health) |
+
+**Demo Credentials:**
+| Role | Email | Password |
+|---|---|---|
+| Patient | `demo.live@test.com` | `Password123!` |
+
+[📖 API Docs](https://healthcare-booking-platform-tl1j.vercel.app/api/docs) · [🐛 Report Bug](https://github.com/Sarika-stack23/Healthcare-booking-platform/issues) · [✨ Request Feature](https://github.com/Sarika-stack23/Healthcare-booking-platform/issues)
 
 </div>
 
 ---
 
-## 📊 Real Metrics
+## 🚀 What Makes MedAILockr Different?
+
+Most healthcare booking apps on the market have critical flaws that lead to **double-bookings**, **no real-time validation**, and **poor conflict handling**. MedAILockr was built from the ground up to solve these problems:
+
+| Problem (Other Apps) | MedAILockr's Solution |
+|---|---|
+| ❌ **Double-booking** — Two patients can book the same slot simultaneously | ✅ **Compound Mongoose index** on `(doctorId, date, time, status)` enforces uniqueness at the database level. Even if two requests arrive at the exact same millisecond, MongoDB rejects the second one. |
+| ❌ **No slot verification** — Bookings are accepted without checking doctor availability | ✅ **Real-time slot engine** — Frontend fetches available slots from the API for each date. The backend cross-references existing appointments and the doctor's schedule before confirming. |
+| ❌ **Silent failures** — Users click "Book" and nothing happens, no feedback | ✅ **Toast notifications + error propagation** — Every API error is caught, parsed, and shown to the user as a clear toast message with the exact reason for failure. |
+| ❌ **No audit trail** — No record of who did what and when | ✅ **TTL-indexed audit logs** — Every appointment action (create, cancel, reschedule) is logged with timestamps, IP addresses, and user IDs. Old logs auto-expire via MongoDB TTL indexes. |
+| ❌ **Weak authentication** — Plain passwords, no token refresh | ✅ **Dual-token JWT system** — Short-lived access tokens (15min) + long-lived refresh tokens (7 days). Passwords hashed with bcrypt (12 rounds). Automatic silent token refresh via Axios interceptors. |
+| ❌ **No role separation** — Patients and doctors see the same interface | ✅ **Role-based access control (RBAC)** — Three distinct roles (Patient, Doctor, Admin) with separate dashboards, middleware-enforced route protection, and different API permissions. |
+
+---
+
+## 📊 Real Metrics (Verified)
 
 | Metric | Value |
 |---|---|
 | **API Endpoints** | 36 RESTful endpoints across 7 domains |
 | **Test Coverage** | 32 unit tests — all passing |
-| **Response Time** | Health: ~1ms · Login: ~277ms · Register: ~282ms |
+| **Response Time** | Health: <1ms · Login: ~277ms · Register: ~282ms |
 | **Codebase** | ~9,100 lines (6,300 backend + 2,800 frontend) |
 | **Frontend Pages** | 14 page components + 4 shared components |
 | **Data Models** | 6 Mongoose schemas with 20+ compound indexes |
 | **Build Time** | Frontend: ~630ms · Backend: compiles cleanly |
 | **Conflict Detection** | Compound index + double-check query prevents overlapping bookings |
+| **Deployment** | Vercel Serverless (Frontend + Backend) |
+| **Database** | MongoDB Atlas M0 (Free Tier, 512MB) |
 
 ---
 
@@ -51,424 +81,334 @@ graph TB
         UI --> AX
     end
 
-    subgraph Server["Backend — Express + TypeScript Strict"]
-        GW[API Gateway<br/>CORS · Helmet · Rate Limit]
-        MW[Middleware Stack<br/>Auth · RBAC · Validate · Upload]
-        RT[Route Layer<br/>7 route modules · 36 endpoints]
-        SV[Service Layer<br/>Business Logic · Conflict Detection]
-        MD[Model Layer<br/>Mongoose ODM · 6 schemas]
-    end
-
-    subgraph Data["Data Layer"]
-        DB[(MongoDB<br/>20+ indexes · TTL auto-expiry)]
-        FS[File Storage<br/>Multer · Signed URLs]
+    subgraph Server["Backend — Node.js + Express"]
+        MW["Middleware Stack<br/>CORS · Rate Limit · Auth · Validation"]
+        RT[Route Layer — 36 Endpoints]
+        SV[Service Layer — Business Logic]
+        DB[(MongoDB — 6 Models)]
+        MW --> RT --> SV --> DB
     end
 
     subgraph Security["Security Layer"]
-        JWT[JWT Access + Refresh<br/>Token Rotation]
-        RBAC[Role-Based Access<br/>Patient · Doctor · Admin]
-        RL[Rate Limiting<br/>Global · Auth · Upload]
-        AUDIT[Audit Trail<br/>TTL-indexed · 1yr expiry]
+        JWT[JWT Dual-Token Auth]
+        RBAC[Role-Based Access]
+        RL[Rate Limiting]
+        VAL[Zod Validation]
     end
 
-    AX -->|HTTPS| GW
-    GW --> MW --> RT --> SV --> MD
-    MD --> DB
-    MW --> FS
+    AX -->|HTTPS + Bearer Token| MW
     SV --> JWT
     MW --> RBAC
-    GW --> RL
-    SV --> AUDIT
+    MW --> RL
+    MW --> VAL
 ```
 
-### Request Flow
+### Request Flow — Booking an Appointment
 
 ```mermaid
 sequenceDiagram
-    participant P as Patient Browser
-    participant F as React Frontend
-    participant B as Express Backend
-    participant M as MongoDB
+    participant P as Patient
+    participant F as Frontend
+    participant A as API Server
+    participant D as MongoDB
 
-    P->>F: Click "Book Appointment"
-    F->>B: POST /api/appointments (JWT in header)
-    B->>B: Auth Middleware → Validate JWT
-    B->>B: RBAC Middleware → Check role = patient
-    B->>B: Zod Validation → Sanitize input
-    B->>M: Query: Check slot availability
-    M-->>B: Available slots list
-    B->>M: Query: Check for existing booking (conflict detection)
-    M-->>B: No conflict found
-    B->>M: Create appointment document
-    M-->>B: Appointment created
-    B->>M: Write audit log entry
-    B-->>F: 201 Created + appointment data
-    F->>F: Update Zustand store
-    F-->>P: Show success toast + redirect
+    P->>F: Select doctor, date, time
+    F->>A: GET /api/doctors/:id/available-slots?date=...
+    A->>D: Query existing appointments for that date
+    D-->>A: Return booked slots
+    A-->>F: Return available slots only
+    F->>P: Display available time slots
+
+    P->>F: Click "Confirm Appointment"
+    F->>A: POST /api/appointments
+    A->>D: Check compound index (doctorId + date + time + status)
+    
+    alt Slot Available
+        D-->>A: Insert succeeds
+        A->>D: Create audit log entry
+        A-->>F: 201 — Appointment confirmed
+        F->>P: ✅ "Appointment booked successfully!"
+    else Slot Already Taken
+        D-->>A: Duplicate key error (E11000)
+        A-->>F: 409 — Conflict detected
+        F->>P: ❌ "This slot is already booked"
+    end
 ```
 
-### Conflict Detection Engine
+### Conflict Detection Engine — How Double-Booking is Prevented
 
 ```mermaid
-flowchart LR
-    A[Booking Request] --> B{Slot in<br/>weekly schedule?}
-    B -->|No| X1[❌ 409 Slot not available]
-    B -->|Yes| C{Date override<br/>blocks it?}
-    C -->|Yes| X2[❌ 409 Override blocks slot]
-    C -->|No| D{Existing booking<br/>at same time?}
-    D -->|Yes| X3[❌ 409 Already booked]
-    D -->|No| E[✅ Create Appointment]
-    E --> F[Write Audit Log]
+flowchart TD
+    A[Booking Request Arrives] --> B{Compound Index Check}
+    B -->|"doctorId + date + time + status<br/>combination is UNIQUE"| C[Accept Booking]
+    B -->|Duplicate Detected| D[MongoDB E11000 Error]
+    D --> E[Return 409 Conflict]
+    C --> F{Application-Level Double Check}
+    F -->|"Query: Any active appointment<br/>for same doctor + date + time?"| G[No Conflict Found]
+    F -->|Conflict Found| H[Return 409 Conflict]
+    G --> I[✅ Appointment Created]
+    I --> J[Audit Log Written with TTL]
+
+    style D fill:#ff4444,color:#fff
+    style E fill:#ff4444,color:#fff
+    style H fill:#ff4444,color:#fff
+    style I fill:#00aa00,color:#fff
+    style J fill:#0066cc,color:#fff
 ```
 
 ---
 
-## ✨ Features
+## 🔐 Security Architecture (10 Layers)
 
-### 🔐 Authentication & Security
-- **JWT dual-token system** — 15-min access tokens + 7-day refresh tokens with automatic rotation
-- **bcrypt password hashing** — 12 salt rounds
-- **Forgot/reset password** — SHA-256 hashed reset tokens with configurable expiry
-- **Rate limiting** — 100 req/15min global, 10 req/15min for auth, 3 req/hour for password reset
-- **Helmet security headers** — CSP, HSTS, X-Frame-Options, and more
-- **Development CORS** — auto-allows any localhost port; strict whitelist in production
+```
+┌─────────────────────────────────────────────────────────────┐
+│  Layer 1: CORS Whitelist — Only approved origins allowed    │
+│  Layer 2: Helmet — Security headers (XSS, HSTS, etc.)      │
+│  Layer 3: Rate Limiting — 100 req/15min (10 for auth)       │
+│  Layer 4: JWT Verification — Token expiry + signature       │
+│  Layer 5: Role-Based Access — Patient / Doctor / Admin      │
+│  Layer 6: Zod Schema Validation — Request body sanitization │
+│  Layer 7: Mongoose Strict Mode — Schema enforcement at DB   │
+│  Layer 8: Bcrypt Password Hashing — 12 salt rounds          │
+│  Layer 9: File Upload Filtering — MIME + extension checks   │
+│  Layer 10: Audit Logging — TTL-indexed action trail         │
+└─────────────────────────────────────────────────────────────┘
+```
 
-### 👥 Role-Based Access Control (3 Roles)
+---
 
-| Role | Capabilities |
-|---|---|
-| **Patient** | Book/reschedule/cancel appointments, upload medical records, view own data, manage profile |
-| **Doctor** | Set weekly availability + overrides + breaks, view patient records, complete appointments |
-| **Admin** | Full CRUD on users, appointment analytics, revenue reports, audit log access |
+## 📂 Project Structure
 
-### 📅 Appointment System
-- **Real-time slot generation** from weekly schedules, respecting overrides and breaks
-- **Conflict detection engine** — compound index `(doctorId, date, time, status)` + application-level double-check
-- **Full lifecycle** — `scheduled → confirmed → completed / cancelled / no_show`
-- **Reschedule with re-validation** — checks new slot availability before confirming
-- **Audit trail** — every status change logged with actor, timestamp, and reason
+```
+Healthcare-booking-platform/
+├── backend/                          # Node.js + Express API
+│   ├── api/
+│   │   └── index.ts                  # Vercel serverless entry point
+│   ├── src/
+│   │   ├── config/
+│   │   │   ├── database.ts           # MongoDB connection with auto-reconnect
+│   │   │   ├── env.ts                # Environment variable validation
+│   │   │   └── swagger.ts            # OpenAPI 3.0 documentation
+│   │   ├── controllers/              # 7 controllers (request/response handling)
+│   │   ├── middleware/
+│   │   │   ├── auth.middleware.ts     # JWT verification + role extraction
+│   │   │   ├── rbac.middleware.ts     # Role-based route protection
+│   │   │   ├── rateLimit.middleware.ts # Configurable rate limiter
+│   │   │   ├── upload.middleware.ts   # Multer file upload with MIME filtering
+│   │   │   └── validate.middleware.ts # Zod schema validation
+│   │   ├── models/                   # 6 Mongoose schemas
+│   │   │   ├── User.ts               # Patient + Doctor + Admin profiles
+│   │   │   ├── Appointment.ts        # Conflict-detection compound index
+│   │   │   ├── MedicalRecord.ts      # File metadata + access control
+│   │   │   ├── Notification.ts       # In-app notification system
+│   │   │   ├── AuditLog.ts           # TTL-indexed action trail
+│   │   │   └── ResetToken.ts         # Password reset with expiry
+│   │   ├── routes/                   # 7 route files (36 endpoints)
+│   │   ├── services/                 # Business logic layer
+│   │   ├── validators/               # Zod schemas for every endpoint
+│   │   └── utils/
+│   │       ├── logger.ts             # Winston (console in prod, files locally)
+│   │       └── ApiError.ts           # Standardized error responses
+│   ├── vercel.json                   # Vercel serverless configuration
+│   └── tsconfig.json                 # TypeScript strict mode
+│
+├── frontend/                         # React 19 + Vite SPA
+│   ├── src/
+│   │   ├── api/axios.ts              # Axios interceptors (auto token refresh)
+│   │   ├── store/authStore.ts        # Zustand auth persistence
+│   │   ├── pages/
+│   │   │   ├── auth/                 # Login, Register
+│   │   │   ├── patient/              # Dashboard, Doctors, BookAppointment,
+│   │   │   │                         # Appointments, Records, Profile
+│   │   │   ├── doctor/               # Dashboard, Schedule, Appointments
+│   │   │   └── admin/                # Dashboard, Users, Reports
+│   │   └── components/               # Sidebar, ProtectedRoute, Layout
+│   ├── vercel.json                   # SPA rewrite rules
+│   └── vite.config.ts
+│
+├── README.md                         # This file
+└── LICENSE                           # MIT License
+```
 
-### 🗓 Doctor Availability Management
-- **Weekly schedule** — per-day time slots (e.g., Mon 09:00–12:00, 14:00–17:00)
-- **Date overrides** — block specific dates for holidays/leaves
-- **Break times** — recurring or one-off breaks within working hours
-- **Smart 30-min slot generation** — configurable duration (10–120 min)
+---
 
-### 🗂 Medical Records
-- **Secure file upload** — PDF, images, Word docs (max 10MB via Multer)
-- **Signed download URLs** — time-limited access for security
-- **Record types** — lab reports, prescriptions, imaging, discharge summaries
-- **Soft delete** — recoverable by admin; hard delete available
+## 📡 API Reference (36 Endpoints)
 
-### 🔔 Notification System
-- **Multi-channel** — Email, SMS, Push, In-App queuing
-- **Template-based** — appointment reminders, status updates, system alerts
-- **Retry logic** — configurable max retries with failure tracking
-- **Scheduled delivery** — future-dated notifications
-- **90-day TTL auto-cleanup** — MongoDB TTL index
+### Authentication (6 endpoints)
 
-### 📊 Observability & Admin
-- **Structured logging** — Winston with service tags and request IDs
-- **Health check** (`/health`) — uptime, environment, timestamp
-- **Readiness check** (`/ready`) — database connectivity verification
-- **Audit logs** — 1-year TTL, filterable by user/action/resource
-- **Admin analytics** — appointment stats by doctor, status, and revenue
+| Method | Endpoint | Auth | Description |
+|---|---|---|---|
+| `POST` | `/api/auth/register` | — | Create new account |
+| `POST` | `/api/auth/login` | — | Login, get tokens |
+| `POST` | `/api/auth/refresh` | — | Refresh access token |
+| `POST` | `/api/auth/logout` | ✅ | Invalidate tokens |
+| `POST` | `/api/auth/forgot-password` | — | Request password reset |
+| `POST` | `/api/auth/reset-password` | — | Reset password |
+
+### Users & Doctors (7 endpoints)
+
+| Method | Endpoint | Auth | Description |
+|---|---|---|---|
+| `GET` | `/api/users/me` | ✅ | Get current user profile |
+| `PUT` | `/api/users/me` | ✅ | Update own profile |
+| `PUT` | `/api/users/change-password` | ✅ | Change password |
+| `GET` | `/api/users/doctors` | ✅ | List all doctors |
+| `GET` | `/api/users/doctors/:id` | ✅ | Get doctor details |
+| `GET` | `/api/doctors/:id/available-slots` | ✅ | Get available time slots |
+| `PUT` | `/api/doctors/availability` | 🩺 | Update schedule |
+
+### Appointments (8 endpoints)
+
+| Method | Endpoint | Auth | Description |
+|---|---|---|---|
+| `POST` | `/api/appointments` | ✅ | Book new appointment |
+| `GET` | `/api/appointments` | ✅ | List my appointments |
+| `GET` | `/api/appointments/:id` | ✅ | Get appointment details |
+| `PUT` | `/api/appointments/:id` | ✅ | Update appointment |
+| `PUT` | `/api/appointments/:id/cancel` | ✅ | Cancel with reason |
+| `PUT` | `/api/appointments/:id/complete` | 🩺 | Mark as completed |
+| `PUT` | `/api/appointments/:id/reschedule` | ✅ | Reschedule |
+| `GET` | `/api/appointments/stats` | ✅ | Appointment statistics |
+
+### Medical Records (5 endpoints)
+
+| Method | Endpoint | Auth | Description |
+|---|---|---|---|
+| `POST` | `/api/records/upload` | ✅ | Upload medical record |
+| `GET` | `/api/records` | ✅ | List my records |
+| `GET` | `/api/records/:id` | ✅ | Get record details |
+| `GET` | `/api/records/:id/download` | ✅ | Generate download URL |
+| `DELETE` | `/api/records/:id` | ✅ | Delete record |
+
+### Notifications (4 endpoints)
+
+| Method | Endpoint | Auth | Description |
+|---|---|---|---|
+| `GET` | `/api/notifications` | ✅ | List notifications |
+| `PUT` | `/api/notifications/:id/read` | ✅ | Mark as read |
+| `PUT` | `/api/notifications/read-all` | ✅ | Mark all as read |
+| `GET` | `/api/notifications/unread-count` | ✅ | Unread count |
+
+### Admin (6 endpoints)
+
+| Method | Endpoint | Auth | Description |
+|---|---|---|---|
+| `GET` | `/api/admin/users` | 👑 | List all users |
+| `GET` | `/api/admin/users/:id` | 👑 | Get user details |
+| `PUT` | `/api/admin/users/:id/status` | 👑 | Activate/deactivate user |
+| `PUT` | `/api/admin/users/:id/role` | 👑 | Change user role |
+| `GET` | `/api/admin/stats` | 👑 | Platform statistics |
+| `GET` | `/api/admin/audit-logs` | 👑 | View audit trail |
+
+> **Legend:** ✅ = Any authenticated user · 🩺 = Doctor only · 👑 = Admin only
 
 ---
 
 ## 🛠 Tech Stack
 
 ### Backend
-| Technology | Version | Purpose |
-|---|---|---|
-| **Node.js** | v22 LTS | Runtime |
-| **Express.js** | 4.x | Web framework |
-| **TypeScript** | 5.x | Type safety — strict mode |
-| **MongoDB + Mongoose** | 8.x | Database + ODM with 20+ indexes |
-| **JWT (jsonwebtoken)** | 9.x | Auth — access + refresh token rotation |
-| **Zod** | 3.x | Input validation & sanitization |
-| **Multer** | 1.4.x | File uploads (max 10MB) |
-| **Winston** | 3.x | Structured logging |
-| **Helmet + CORS** | latest | Security headers + origin whitelisting |
-| **express-rate-limit** | 7.x | Multi-tier rate limiting |
-| **Swagger UI** | 5.x | Auto-generated API documentation |
-| **Jest + ts-jest** | 29.x | Unit testing |
+| Technology | Purpose |
+|---|---|
+| **Node.js 22 LTS** | Runtime |
+| **Express.js 4** | HTTP framework |
+| **TypeScript 5 (strict)** | Type safety |
+| **MongoDB + Mongoose 8** | Database + ODM |
+| **JWT (jsonwebtoken)** | Authentication |
+| **bcryptjs** | Password hashing |
+| **Zod** | Request validation |
+| **Winston** | Logging |
+| **Multer** | File uploads |
+| **Swagger UI** | API documentation |
+| **Vitest** | Testing |
 
 ### Frontend
-| Technology | Version | Purpose |
-|---|---|---|
-| **React** | 19.x | UI framework |
-| **Vite** | 8.x | Build tool (~630ms builds) |
-| **TypeScript** | 5.x | Type safety |
-| **Zustand** | 5.x | State management with persistence |
-| **React Router** | 7.x | Client-side routing |
-| **React Hook Form** | 7.x | Form management |
-| **Zod** | 4.x | Client-side validation |
-| **Axios** | 1.x | HTTP client with interceptors |
-| **Lucide React** | latest | Icon library |
-| **date-fns** | 4.x | Date formatting |
+| Technology | Purpose |
+|---|---|
+| **React 19** | UI framework |
+| **Vite** | Build tool |
+| **TypeScript** | Type safety |
+| **Zustand** | State management |
+| **Axios** | HTTP client with interceptors |
+| **React Router 7** | Client-side routing |
+| **Tailwind CSS 4** | Styling |
+| **Lucide React** | Icons |
+| **React Hot Toast** | Notifications |
+| **date-fns** | Date utilities |
 
 ### Infrastructure
-| Tool | Purpose |
+| Service | Purpose |
 |---|---|
-| **Railway** | Cloud hosting — backend + MongoDB |
-| **NIXPACKS** | Auto-build on Railway |
-| **GitHub** | Source control + CI/CD triggers |
+| **Vercel** | Frontend + Backend hosting (serverless) |
+| **MongoDB Atlas** | Cloud database (M0 free tier) |
+| **GitHub** | Source control + CI/CD trigger |
 
 ---
 
-## 📁 Project Structure
-
-```
-Healthcare-booking-platform/
-│
-├── backend/                          # Node.js REST API
-│   ├── src/
-│   │   ├── __tests__/                # Jest unit tests (32 tests)
-│   │   ├── config/                   # Database, env, Swagger config
-│   │   ├── controllers/              # Route handlers (thin controllers)
-│   │   ├── middleware/               # Auth, RBAC, validation, rate-limit, upload
-│   │   ├── models/                   # 6 Mongoose schemas with indexes
-│   │   │   ├── User.ts               # Patient/Doctor/Admin with profiles
-│   │   │   ├── Appointment.ts        # Booking with conflict detection index
-│   │   │   ├── Availability.ts       # Weekly schedule + overrides + breaks
-│   │   │   ├── MedicalRecord.ts      # File metadata + soft delete
-│   │   │   ├── Notification.ts       # Multi-channel with TTL
-│   │   │   └── AuditLog.ts           # 1-year TTL auto-expiry
-│   │   ├── routes/                   # 7 route modules → 36 endpoints
-│   │   ├── services/                 # Business logic layer
-│   │   ├── types/                    # TypeScript interfaces
-│   │   ├── utils/                    # Logger, JWT, ApiError, AuditLog
-│   │   ├── validators/               # Zod schemas for all inputs
-│   │   └── app.ts                    # Entry point + middleware stack
-│   ├── jest.config.js
-│   ├── tsconfig.json
-│   └── package.json
-│
-├── frontend/                         # React 19 SPA
-│   ├── src/
-│   │   ├── api/                      # Axios instance + interceptors
-│   │   ├── components/               # Layout, Navbar, Sidebar, ProtectedRoute
-│   │   ├── pages/                    # 14 page components
-│   │   │   ├── auth/                 # Login, Register
-│   │   │   ├── patient/              # Dashboard, Doctors, Book, Appointments, Records, Profile
-│   │   │   ├── doctor/               # Dashboard, Schedule
-│   │   │   └── admin/                # Dashboard, Users
-│   │   ├── store/                    # Zustand auth store with persistence
-│   │   ├── types/                    # Shared TypeScript types
-│   │   ├── App.tsx                   # Router + role-based routing
-│   │   └── main.tsx                  # Entry point
-│   ├── vite.config.ts
-│   └── package.json
-│
-├── .gitignore                        # Comprehensive ignore rules
-├── LICENSE                           # MIT License
-└── README.md                        # ← You are here
-```
-
----
-
-## ⚙️ Getting Started
+## 🚀 Getting Started
 
 ### Prerequisites
 
-- **Node.js** v18+ (recommended: v22 LTS)
-- **MongoDB** v6+ (local install or cloud — [MongoDB Atlas](https://www.mongodb.com/atlas))
-- **Git**
+- Node.js 18+ (recommended: 22 LTS)
+- MongoDB (local or Atlas)
+- npm or yarn
 
-### 1. Clone the Repository
+### Installation
 
 ```bash
+# Clone the repository
 git clone https://github.com/Sarika-stack23/Healthcare-booking-platform.git
 cd Healthcare-booking-platform
-```
 
-### 2. Backend Setup
-
-```bash
+# Install backend dependencies
 cd backend
 npm install
 
-# Create environment file
-cat > .env << 'EOF'
+# Install frontend dependencies
+cd ../frontend
+npm install
+```
+
+### Environment Setup
+
+Create `backend/.env`:
+
+```env
 PORT=5001
 NODE_ENV=development
 MONGODB_URI=mongodb://localhost:27017/medailockr
-JWT_ACCESS_SECRET=<replace-with-64-byte-random-hex>
-JWT_REFRESH_SECRET=<replace-with-64-byte-random-hex>
+JWT_ACCESS_SECRET=your-64-byte-hex-secret
+JWT_REFRESH_SECRET=another-64-byte-hex-secret
 JWT_ACCESS_EXPIRES_IN=15m
 JWT_REFRESH_EXPIRES_IN=7d
 ALLOWED_ORIGINS=http://localhost:5173,http://localhost:5174
 MAX_FILE_SIZE=10485760
 UPLOAD_PATH=uploads/
-EOF
-
-# Generate secure JWT secrets
-node -e "const c=require('crypto'); console.log('JWT_ACCESS_SECRET=' + c.randomBytes(64).toString('hex')); console.log('JWT_REFRESH_SECRET=' + c.randomBytes(64).toString('hex'))"
-
-# Create required directories
-mkdir -p uploads logs
-
-# Start development server
-npm run dev
-# → http://localhost:5001
-# → Swagger: http://localhost:5001/api/docs
 ```
 
-### 3. Frontend Setup
+### Run Locally
 
 ```bash
-cd frontend
-npm install
-
-# Create environment file
-echo "VITE_API_BASE_URL=http://localhost:5001/api" > .env
-
-# Start development server
+# Terminal 1 — Start backend
+cd backend
 npm run dev
-# → http://localhost:5174
+
+# Terminal 2 — Start frontend
+cd frontend
+npm run dev
 ```
 
-### 4. Run Tests
+Visit `http://localhost:5174` to use the app.
+
+### Run Tests
 
 ```bash
 cd backend
-npm test
-# → 32 tests passing
+npm test        # Run all 32 tests
 ```
 
 ---
 
-## 📖 API Reference
-
-### Quick Endpoint Map (36 endpoints)
-
-| Domain | Method | Endpoint | Auth | Description |
-|---|---|---|---|---|
-| **Auth** | POST | `/api/auth/register` | ❌ | Create account (patient/doctor) |
-| | POST | `/api/auth/login` | ❌ | Login → access + refresh tokens |
-| | POST | `/api/auth/refresh` | ❌ | Rotate tokens |
-| | POST | `/api/auth/logout` | ✅ | Invalidate all sessions |
-| | POST | `/api/auth/forgot-password` | ❌ | Request reset token |
-| | POST | `/api/auth/reset-password/:token` | ❌ | Reset with token |
-| **Users** | GET | `/api/users/profile` | ✅ | Get own profile |
-| | PUT | `/api/users/profile` | ✅ | Update profile |
-| | GET | `/api/users/doctors` | ✅ | Search/list doctors |
-| | GET | `/api/users/doctors/:id` | ✅ | Get doctor details |
-| **Doctors** | GET | `/api/doctors/:id/availability` | ✅ | Get schedule |
-| | GET | `/api/doctors/:id/available-slots` | ✅ | Get open slots for date |
-| | POST | `/api/doctors/:id/availability/weekly` | 🔒 Doctor | Set weekly schedule |
-| | POST | `/api/doctors/:id/availability/overrides` | 🔒 Doctor | Add date override |
-| | PUT | `/api/doctors/:id/availability/breaks` | 🔒 Doctor | Set break times |
-| **Appointments** | GET | `/api/appointments` | ✅ | List own appointments |
-| | GET | `/api/appointments/:id` | ✅ | Get appointment details |
-| | POST | `/api/appointments` | 🔒 Patient | Book appointment |
-| | PUT | `/api/appointments/:id/reschedule` | ✅ | Reschedule |
-| | PUT | `/api/appointments/:id/cancel` | ✅ | Cancel with reason |
-| | PUT | `/api/appointments/:id/complete` | 🔒 Doctor | Mark completed |
-| **Records** | GET | `/api/records` | ✅ | List medical records |
-| | POST | `/api/records/upload` | 🔒 Patient | Upload file |
-| | GET | `/api/records/:id` | ✅ | Get record details |
-| | GET | `/api/records/:id/download` | ✅ | Download file (signed URL) |
-| | GET | `/api/records/stats` | ✅ | Storage stats |
-| | DELETE | `/api/records/:id` | ✅ | Soft/hard delete |
-| **Notifications** | POST | `/api/notifications/send` | 🔒 Admin | Send notification |
-| | GET | `/api/notifications` | ✅ | List notifications |
-| | GET | `/api/notifications/unread-count` | ✅ | Unread count |
-| | POST | `/api/notifications/:id/read` | ✅ | Mark as read |
-| | POST | `/api/notifications/:id/retry` | 🔒 Admin | Retry failed |
-| **Admin** | GET | `/api/admin/users` | 🔒 Admin | List all users |
-| | PATCH | `/api/admin/users/:id/toggle` | 🔒 Admin | Activate/deactivate |
-| | GET | `/api/admin/analytics/appointments` | 🔒 Admin | Analytics dashboard |
-| | GET | `/api/admin/audit-logs` | 🔒 Admin | Audit trail |
-| **System** | GET | `/health` | ❌ | Health check |
-| | GET | `/ready` | ❌ | Readiness + DB status |
-| | GET | `/api` | ❌ | API info |
-
-> **Legend:** ❌ = No auth · ✅ = Any authenticated user · 🔒 = Specific role required
-
----
-
-## 🔒 Security Features
-
-| Layer | Implementation |
-|---|---|
-| **Authentication** | JWT access (15min) + refresh (7d) with rotation on every refresh |
-| **Password Storage** | bcrypt with 12 salt rounds |
-| **Input Validation** | Zod schemas on every endpoint — sanitized before reaching controllers |
-| **Rate Limiting** | 3-tier: global (100/15min), auth (10/15min), password reset (3/hr) |
-| **CORS** | Strict origin whitelist in production; auto-allow localhost in development |
-| **HTTP Security** | Helmet — CSP, HSTS, X-Frame-Options, X-Content-Type-Options |
-| **RBAC** | Middleware-enforced role checks with self-authorization for doctor endpoints |
-| **Token Rotation** | Refresh token version tracking; logout invalidates all sessions |
-| **Audit Trail** | Every auth event, booking, and admin action logged with IP + timestamp |
-| **File Security** | Multer file type + size validation; signed download URLs with expiry |
-
----
-
-## 🧪 Testing
-
-```bash
-cd backend && npm test
-```
-
-```
-PASS src/__tests__/auth.test.ts
-  ApiError             — 9 tests
-  JWT utilities        — 3 tests
-  bcrypt hashing       — 3 tests
-  registerSchema       — 6 tests
-  bookAppointmentSchema — 5 tests
-  notificationSchema   — 2 tests
-  uploadRecordSchema   — 3 tests
-  User model mock      — 1 test
-
-Test Suites: 1 passed, 1 total
-Tests:       32 passed, 32 total
-Time:        ~3.3s
-```
-
----
-
-## 🚀 Deployment
-
-### Railway (Current Setup)
-
-The project is configured for Railway deployment with auto-build via NIXPACKS:
-
-```bash
-# Backend builds and starts with:
-npm run build    # tsc → dist/
-npm start        # node dist/app.js
-```
-
-### Environment Variables (Production)
-
-| Variable | Required | Description |
-|---|---|---|
-| `MONGODB_URI` | ✅ | MongoDB connection string |
-| `JWT_ACCESS_SECRET` | ✅ | 64-byte hex string |
-| `JWT_REFRESH_SECRET` | ✅ | 64-byte hex string |
-| `PORT` | ❌ | Default: 5000 |
-| `NODE_ENV` | ❌ | `production` for Railway |
-| `ALLOWED_ORIGINS` | ❌ | Comma-separated origins |
-| `MAX_FILE_SIZE` | ❌ | Default: 10MB |
-
----
-
-## 🤝 Contributing
-
-Pull requests are welcome! For major changes, please open an issue first.
-
-1. **Fork** the repo
-2. **Branch**: `git checkout -b feature/your-feature`
-3. **Commit**: `git commit -m 'feat: add amazing feature'`
-4. **Push**: `git push origin feature/your-feature`
-5. **PR**: Open a Pull Request
-
----
-
-## 📄 License
+## 📝 License
 
 This project is licensed under the **MIT License** — see the [LICENSE](./LICENSE) file for details.
 
@@ -476,10 +416,6 @@ This project is licensed under the **MIT License** — see the [LICENSE](./LICEN
 
 <div align="center">
 
-Built with ❤️ by [Sarika](https://github.com/Sarika-stack23)
-
-**MedAILockr** — Production-Grade Healthcare Booking Platform
-
-⭐ Star this repo if you found it helpful!
+**Built with ❤️ by [Sarika](https://github.com/Sarika-stack23)**
 
 </div>
