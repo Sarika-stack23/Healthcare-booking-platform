@@ -1,17 +1,13 @@
+import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { connectDB } from '../src/config/database';
 import app from '../src/app';
-import type { Request, Response } from 'express';
 
-// Vercel serverless function entry point
-// We need to connect to MongoDB before handling any request.
 let isConnected = false;
 
-const handler = async (req: Request, res: Response) => {
+export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (!isConnected) {
     await connectDB();
     isConnected = true;
   }
   return app(req, res);
-};
-
-export default handler;
+}
