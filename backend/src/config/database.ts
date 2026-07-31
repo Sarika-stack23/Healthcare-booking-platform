@@ -22,6 +22,10 @@ export const connectDB = async (): Promise<void> => {
     });
   } catch (error) {
     logger.error('Failed to connect to MongoDB:', error);
+    // In serverless environments, don't kill the process — just throw
+    if (process.env.VERCEL) {
+      throw error;
+    }
     process.exit(1);
   }
 };
