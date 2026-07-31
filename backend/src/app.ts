@@ -54,6 +54,11 @@ app.use(
       // Allow requests with no origin (Postman, curl, etc.)
       if (!origin) return callback(null, true);
 
+      // In development, always allow localhost on any port
+      if (env.isDev && /^https?:\/\/localhost(:\d+)?$/.test(origin)) {
+        return callback(null, true);
+      }
+
       if (env.cors.allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {

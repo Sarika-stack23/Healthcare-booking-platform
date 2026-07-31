@@ -44,19 +44,12 @@ const Register = () => {
 
   const onSubmit = async (data: FormData) => {
     try {
-      // Strip confirmPassword, specialization, consultationFee from top-level
-      const { confirmPassword: _cp, specialization, consultationFee, ...rest } = data;
-      void _cp;
+      // The backend expects confirmPassword, specialization, and consultationFee at the top level.
+      const payload: Record<string, unknown> = { ...data };
 
-      const payload: Record<string, unknown> = { ...rest };
-
-      // Add doctor profile fields if role is doctor
-      if (data.role === 'doctor' && specialization) {
-        const fee = consultationFee ? Number(consultationFee) : undefined;
-        payload.doctorProfile = {
-          specialization,
-          ...(fee !== undefined && !isNaN(fee) ? { consultationFee: fee } : {}),
-        };
+      // Convert consultationFee to a number if present
+      if (data.role === 'doctor' && data.consultationFee) {
+        payload.consultationFee = Number(data.consultationFee);
       }
 
       const res = await api.post('/auth/register', payload);
@@ -85,34 +78,33 @@ const Register = () => {
           <p className="text-gray-500 mt-1">Join the healthcare platform</p>
         </div>
 
-        {/* Role Selector */}
-        <div className="flex gap-3 mb-6">
-          <button
-            type="button"
-            onClick={() => handleRoleSelect('patient')}
-            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg border-2 text-sm font-medium transition ${
-              selectedRole === 'patient'
-                ? 'border-blue-600 bg-blue-50 text-blue-600'
-                : 'border-gray-200 text-gray-600 hover:border-gray-300'
-            }`}
-          >
-            <User size={16} /> Patient
-          </button>
-          <button
-            type="button"
-            onClick={() => handleRoleSelect('doctor')}
-            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg border-2 text-sm font-medium transition ${
-              selectedRole === 'doctor'
-                ? 'border-blue-600 bg-blue-50 text-blue-600'
-                : 'border-gray-200 text-gray-600 hover:border-gray-300'
-            }`}
-          >
-            <Stethoscope size={16} /> Doctor
-          </button>
-        </div>
-        <input type="hidden" {...register('role')} />
-
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          {/* Role Selector */}
+          <div className="flex gap-3 mb-2">
+            <button
+              type="button"
+              onClick={() => handleRoleSelect('patient')}
+              className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg border-2 text-sm font-medium transition ${
+                selectedRole === 'patient'
+                  ? 'border-blue-600 bg-blue-50 text-blue-600'
+                  : 'border-gray-200 text-gray-600 hover:border-gray-300'
+              }`}
+            >
+              <User size={16} /> Patient
+            </button>
+            <button
+              type="button"
+              onClick={() => handleRoleSelect('doctor')}
+              className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg border-2 text-sm font-medium transition ${
+                selectedRole === 'doctor'
+                  ? 'border-blue-600 bg-blue-50 text-blue-600'
+                  : 'border-gray-200 text-gray-600 hover:border-gray-300'
+              }`}
+            >
+              <Stethoscope size={16} /> Doctor
+            </button>
+          </div>
+          <input type="hidden" {...register('role')} />
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
