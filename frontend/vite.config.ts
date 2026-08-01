@@ -6,7 +6,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'https://heathcare-booking-platform.up.railway.app',
+        target: 'https://healthcare-booking-platform-tl1j.vercel.app',
         changeOrigin: true,
         secure: true,
       },
