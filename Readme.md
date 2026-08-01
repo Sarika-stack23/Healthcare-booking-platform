@@ -79,7 +79,7 @@ Most healthcare booking apps on the market have critical flaws that lead to **do
 
 | Problem (Other Apps) | MedAILockr's Solution |
 |---|---|
-| ❌ **Double-booking** — Two patients can book the same slot simultaneously | ✅ **Compound Mongoose index** on `(doctorId, date, time, status)` enforces uniqueness at the database level. Even if two requests arrive at the exact same millisecond, MongoDB rejects the second one. |
+| ❌ **Double-booking** — Two patients can book the same slot simultaneously | ✅ **Partial Unique Mongoose Index** on `(doctorId, date, time)` enforces uniqueness at the database level for active appointments. Even if two requests arrive at the exact same millisecond, MongoDB physically rejects the second one. |
 | ❌ **No slot verification** — Bookings are accepted without checking doctor availability | ✅ **Real-time slot engine** — Frontend fetches available slots from the API for each date. The backend cross-references existing appointments and the doctor's schedule before confirming. |
 | ❌ **Silent failures** — Users click "Book" and nothing happens, no feedback | ✅ **Toast notifications + error propagation** — Every API error is caught, parsed, and shown to the user as a clear toast message with the exact reason for failure. |
 | ❌ **No audit trail** — No record of who did what and when | ✅ **TTL-indexed audit logs** — Every appointment action (create, cancel, reschedule) is logged with timestamps, IP addresses, and user IDs. Old logs auto-expire via MongoDB TTL indexes. |
@@ -99,7 +99,7 @@ Most healthcare booking apps on the market have critical flaws that lead to **do
 | **Frontend Pages** | 14 page components + 4 shared components |
 | **Data Models** | 6 Mongoose schemas with 20+ compound indexes |
 | **Build Time** | Frontend: ~630ms · Backend: compiles cleanly |
-| **Conflict Detection** | Compound index + double-check query prevents overlapping bookings |
+| **Conflict Detection** | Partial Unique index + application-level double-check absolutely prevents overlapping bookings |
 | **Deployment** | Vercel Serverless (Frontend + Backend) |
 | **Database** | MongoDB Atlas M0 (Free Tier, 512MB) |
 
@@ -157,7 +157,7 @@ sequenceDiagram
 
     P->>F: Click "Confirm Appointment"
     F->>A: POST /api/appointments
-    A->>D: Check compound index (doctorId + date + time + status)
+    A->>D: Check partial unique index (doctorId + date + time) for active status
     
     alt Slot Available
         D-->>A: Insert succeeds
@@ -176,7 +176,7 @@ sequenceDiagram
 ```mermaid
 flowchart TD
     A[Booking Request Arrives] --> B{Compound Index Check}
-    B -->|"doctorId + date + time + status<br/>combination is UNIQUE"| C[Accept Booking]
+    B -->|"doctorId + date + time<br/>is UNIQUE for active status"| C[Accept Booking]
     B -->|Duplicate Detected| D[MongoDB E11000 Error]
     D --> E[Return 409 Conflict]
     C --> F{Application-Level Double Check}
