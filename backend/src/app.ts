@@ -59,10 +59,22 @@ app.use(
         return callback(null, true);
       }
 
-      if (env.cors.allowedOrigins.includes(origin)) {
+      // Allow all origins if ALLOWED_ORIGINS includes '*'
+      if (env.cors.allowedOrigins.includes('*')) {
+        return callback(null, true);
+      }
+
+      // Check if the origin is in the allowed list (ignoring trailing slashes)
+      const isAllowed = env.cors.allowedOrigins.some(
+        (allowed) => allowed === origin || allowed === `${origin}/` || origin === `${allowed}/`
+      );
+
+      if (isAllowed) {
         callback(null, true);
       } else {
-        callback(new Error(`CORS policy: origin ${origin} is not allowed`));
+        // Instead of throwing a generic Error which causes a 500, we log it and reject
+        logger.warn(`CORS blocked request from origin: ${origin}`);
+        callback(new Error('Not allowed by CORS'));
       }
     },
     credentials: true,

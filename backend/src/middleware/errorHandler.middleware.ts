@@ -71,6 +71,11 @@ export const globalErrorHandler = (
     }
   }
 
+  // ── CORS Errors ─────────────────────────────────────────────────────────────
+  if (err.message === 'Not allowed by CORS') {
+    error = ApiError.forbidden('CORS policy: Origin not allowed');
+  }
+
   // ── Final Error Response ────────────────────────────────────────────────────
   const apiError = error instanceof ApiError ? error : ApiError.internal();
   const statusCode = apiError.statusCode || 500;
