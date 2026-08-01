@@ -239,10 +239,15 @@ export const getAvailableSlots = async (
     );
 
     if (!daySchedule || !daySchedule.isAvailable) {
-      return { date: dateStr, slots: [], slotDurationMinutes: availability.slotDurationMinutes };
+      // Fallback: If doctor has NEVER set a schedule, allow standard slots
+      if (availability.weeklySchedule.length === 0) {
+        activeSlots = [{ start: '09:00', end: '17:00' }];
+      } else {
+        return { date: dateStr, slots: [], slotDurationMinutes: availability.slotDurationMinutes };
+      }
+    } else {
+      activeSlots = daySchedule.slots;
     }
-
-    activeSlots = daySchedule.slots;
   }
 
   // Get breaks for that day
