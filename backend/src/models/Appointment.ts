@@ -116,8 +116,12 @@ AppointmentSchema.index({ doctorId: 1, scheduledDate: 1, scheduledTime: 1 });
 AppointmentSchema.index({ status: 1 });
 AppointmentSchema.index({ createdAt: -1 });
 AppointmentSchema.index(
-  { doctorId: 1, scheduledDate: 1, scheduledTime: 1, status: 1 },
-  { name: 'conflict_detection_idx' }
+  { doctorId: 1, scheduledDate: 1, scheduledTime: 1 },
+  { 
+    unique: true,
+    name: 'unique_conflict_detection_idx',
+    partialFilterExpression: { status: { $in: ['scheduled', 'confirmed'] } }
+  }
 );
 
 const Appointment: Model<IAppointmentDocument> = mongoose.model<IAppointmentDocument>(
