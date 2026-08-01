@@ -239,8 +239,9 @@ export const getAvailableSlots = async (
     );
 
     if (!daySchedule || !daySchedule.isAvailable) {
-      // Fallback: If doctor has NEVER set a schedule, allow standard slots
-      if (availability.weeklySchedule.length === 0) {
+      // Fallback: If doctor has NEVER set a schedule (all days are isAvailable: false), allow standard slots
+      const hasConfiguredSchedule = availability.weeklySchedule.some(s => s.isAvailable);
+      if (!hasConfiguredSchedule) {
         activeSlots = [{ start: '09:00', end: '17:00' }];
       } else {
         return { date: dateStr, slots: [], slotDurationMinutes: availability.slotDurationMinutes };
