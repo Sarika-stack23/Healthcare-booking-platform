@@ -88,7 +88,7 @@ export const listAppointmentsQuerySchema = z.object({
     .regex(/^[a-f\d]{24}$/i, 'Invalid doctor ID format')
     .optional(),
   page: z.coerce.number().int().min(1).default(1),
-  limit: z.coerce.number().int().min(1).max(50).default(10),
+  limit: z.coerce.number().int().min(1).max(500).default(10),
   sortOrder: z.enum(['asc', 'desc']).default('desc'),
 });
 
