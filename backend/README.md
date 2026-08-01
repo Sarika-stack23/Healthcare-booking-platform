@@ -8,10 +8,10 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![Express](https://img.shields.io/badge/Express.js-4.x-000000?style=flat-square&logo=express&logoColor=white)](https://expressjs.com)
 [![MongoDB](https://img.shields.io/badge/MongoDB-8.x-47A248?style=flat-square&logo=mongodb&logoColor=white)](https://www.mongodb.com)
-[![Railway](https://img.shields.io/badge/Deployed%20on-Railway-0B0D0E?style=flat-square&logo=railway&logoColor=white)](https://railway.app)
+[![Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=flat-square&logo=vercel)](https://healthcare-booking-platform-tl1j.vercel.app)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)](LICENSE)
 
-**A production-ready, doctor-first healthcare booking API platform built with Node.js, TypeScript, and MongoDB — fully deployed on Railway.**
+**A production-ready, doctor-first healthcare booking API platform built with Node.js, TypeScript, and MongoDB — fully deployed on Vercel.**
 
 [🚀 Live API](#-live-demo) • [📚 API Docs](#-api-overview) • [⚙️ Setup](#️-local-setup) • [🔐 Security](#-security-features)
 
@@ -53,12 +53,12 @@ The goal was to build a production-grade REST API with proper RBAC (Role-Based A
 
 | Resource | URL |
 |---|---|
-| 🌐 Live API Base | `https://heathcare-booking-platform.up.railway.app/api` |
-| ❤️ Health Check | `https://heathcare-booking-platform.up.railway.app/health` |
-| 📖 Swagger UI Docs | `https://heathcare-booking-platform.up.railway.app/api/docs` |
-| 🟢 Readiness Check | `https://heathcare-booking-platform.up.railway.app/ready` |
+| 🌐 Live API Base | `https://healthcare-booking-platform-tl1j.vercel.app/api` |
+| ❤️ Health Check | `https://healthcare-booking-platform-tl1j.vercel.app/health` |
+| 📖 Swagger UI Docs | `https://healthcare-booking-platform-tl1j.vercel.app/api/docs` |
+| 🟢 Readiness Check | `https://healthcare-booking-platform-tl1j.vercel.app/ready` |
 
-> The API is live and connected to a MongoDB instance on Railway. Test all endpoints via Swagger UI or Postman using the base URL above.
+> The API is live and connected to a MongoDB Atlas instance. Test all endpoints via Swagger UI or Postman using the base URL above.
 
 ---
 
@@ -92,10 +92,9 @@ The goal was to build a production-grade REST API with proper RBAC (Role-Based A
 
 | Tool | Purpose |
 |---|---|
-| **Railway** | Cloud hosting — backend service + MongoDB |
-| **NIXPACKS** | Auto-build system on Railway |
-| **MongoDB (Railway)** | Managed database on Railway internal network |
-| **GitHub** | Version control + CI via Railway auto-deploy |
+| **Vercel** | Serverless hosting for backend API |
+| **MongoDB Atlas** | Managed cloud database (M0 Free Tier) |
+| **GitHub** | Version control + CI via Vercel auto-deploy |
 
 ---
 
@@ -185,7 +184,7 @@ Request
 
 ### Base URL
 ```
-https://heathcare-booking-platform.up.railway.app/api
+https://healthcare-booking-platform-tl1j.vercel.app/api
 ```
 
 ### Authentication
@@ -420,7 +419,7 @@ A complete Postman collection (`Medailockr.postman_collection.json`) is included
 1. Import the collection into Postman
 2. Set the `baseUrl` variable to:
    - **Local:** `http://localhost:5001/api`
-   - **Production:** `https://heathcare-booking-platform.up.railway.app/api`
+   - **Production:** `https://healthcare-booking-platform-tl1j.vercel.app/api`
 3. Run `Register Patient` → tokens auto-save to collection variables
 4. All subsequent requests use `{{accessToken}}` automatically
 
@@ -441,5 +440,5 @@ This project is licensed under the **MIT License**.
 <div align="center">
   Built with ❤️ by <a href="https://github.com/Sarika-stack23">Sarika</a>
   <br/>
-  <sub>MedAILockr Healthcare Platform — Production API on Railway</sub>
+  <sub>MedAILockr Healthcare Platform — Production API on Vercel</sub>
 </div>
