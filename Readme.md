@@ -37,6 +37,42 @@
 
 ---
 
+## 📸 Screenshots
+
+> *Screenshots showcase the modern, responsive UI built with Tailwind CSS and Lucide icons.*
+
+<div align="center">
+  <img src="https://via.placeholder.com/800x400.png?text=Dashboard+Screenshot" width="49%" alt="Patient Dashboard" />
+  <img src="https://via.placeholder.com/800x400.png?text=Appointment+Booking" width="49%" alt="Appointment Booking" />
+  <br/>
+  <img src="https://via.placeholder.com/800x400.png?text=Doctor+Schedule" width="49%" alt="Doctor Schedule Management" />
+  <img src="https://via.placeholder.com/800x400.png?text=Admin+Panel" width="49%" alt="Admin Control Panel" />
+</div>
+
+*(Note: Replace the placeholder URLs above with actual screenshots of your application)*
+
+---
+
+## ✨ Key Features
+
+### 👤 For Patients
+- **Smart Booking System**: Real-time slot availability, preventing double-bookings.
+- **Medical Records Management**: Securely upload and access your medical history.
+- **Appointment Tracking**: View scheduled, completed, and cancelled appointments.
+- **Doctor Discovery**: Browse doctors by specialization, experience, and consultation fees.
+
+### 🩺 For Doctors
+- **Advanced Schedule Management**: Set weekly availability, break times, and date-specific overrides.
+- **Appointment Dashboard**: View daily patient schedules and mark consultations as completed.
+- **Profile Customization**: Manage professional details, fees, and specializations.
+
+### 👑 For Administrators
+- **User Management**: Activate/deactivate accounts, assign roles, and monitor activity.
+- **Platform Analytics**: View system-wide statistics (total users, appointments, revenue).
+- **Audit Trails**: Full transparency with TTL-indexed audit logs for security compliance.
+
+---
+
 ## 🚀 What Makes MedAILockr Different?
 
 Most healthcare booking apps on the market have critical flaws that lead to **double-bookings**, **no real-time validation**, and **poor conflict handling**. MedAILockr was built from the ground up to solve these problems:
@@ -405,6 +441,21 @@ Visit `http://localhost:5174` to use the app.
 cd backend
 npm test        # Run all 32 tests
 ```
+
+### ☁️ Deployment to Vercel
+
+The platform is designed for seamless deployment on Vercel Serverless.
+
+**Backend Deployment:**
+1. Import the repository into Vercel.
+2. Set the Root Directory to `backend`.
+3. Add all environment variables (including `MONGODB_URI` and `JWT_*` secrets).
+4. **Crucial CORS Setup**: Ensure `ALLOWED_ORIGINS` is set to `*` or your exact frontend URL (e.g., `https://my-frontend.vercel.app`) to prevent CORS 500 errors.
+
+**Frontend Deployment:**
+1. Import the repository into Vercel again.
+2. Set the Root Directory to `frontend`.
+3. Add the `VITE_API_BASE_URL` environment variable pointing to your deployed backend (e.g., `https://my-backend.vercel.app/api`).
 
 ---
 
