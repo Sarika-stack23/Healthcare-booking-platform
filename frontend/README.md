@@ -32,7 +32,7 @@
 
 ## 🧠 About
 
-This is the frontend for **MedAILockr**, a healthcare booking platform. It connects to the MedAILockr REST API backend deployed on Railway.
+This is the frontend for **MedAILockr**, a healthcare booking platform. It connects to the MedAILockr REST API backend deployed on Vercel.
 
 The frontend is built with **React 19 + TypeScript + Vite** for a fast, type-safe development experience with Hot Module Replacement (HMR) in development.
 
@@ -55,9 +55,9 @@ This frontend connects to the MedAILockr backend API:
 
 | Resource | URL |
 |---|---|
-| 🌐 Live API | `https://heathcare-booking-platform.up.railway.app/api` |
-| ❤️ Health Check | `https://heathcare-booking-platform.up.railway.app/health` |
-| 📖 API Docs (Swagger) | `https://heathcare-booking-platform.up.railway.app/api/docs` |
+| 🌐 Live API | `https://healthcare-booking-platform-tl1j.vercel.app/api` |
+| ❤️ Health Check | `https://healthcare-booking-platform-tl1j.vercel.app/health` |
+| 📖 API Docs (Swagger) | `https://healthcare-booking-platform-tl1j.vercel.app/api/docs` |
 
 > See the [backend README](../backend/README.md) for full API documentation.
 
@@ -94,7 +94,7 @@ frontend/
 
 - Node.js v18+
 - npm or yarn
-- Backend API running (locally or use the live Railway URL)
+- Backend API running (locally or use the live Vercel URL)
 
 ### 1. Navigate to Frontend
 
@@ -119,7 +119,7 @@ VITE_API_BASE_URL=http://localhost:5001/api
 Or to use the live production backend:
 
 ```env
-VITE_API_BASE_URL=https://heathcare-booking-platform.up.railway.app/api
+VITE_API_BASE_URL=https://healthcare-booking-platform-tl1j.vercel.app/api
 ```
 
 ### 4. Start Development Server
@@ -215,7 +215,7 @@ reactDom.configs.recommended,
 ## 🔗 Related
 
 - [Backend README](../backend/README.md) — API setup, endpoints, deployment
-- [Live API Docs](https://heathcare-booking-platform.up.railway.app/api/docs) — Swagger UI
+- [Live API Docs](https://healthcare-booking-platform-tl1j.vercel.app/api/docs) — Swagger UI
 
 ---
 
